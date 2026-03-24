@@ -40,9 +40,16 @@ components, their boundaries, entry points, and relationships.
    Here is what I found from the initial scan:
    {your_initial_findings}
 
+   Tree script (optional): ${CLAUDE_SKILL_DIR}/scripts/tree_structure.py
+   Use Glob patterns for efficient directory scanning instead of repeated ls.
+
    Return the module map as JSON following the schema in
    references/output-schemas.md § Module Map.
    Save the result to {workspace}/phase1-module-map.json
+
+   IMPORTANT: You MUST write the output file before finishing. If you run
+   low on turns, produce the best map you have rather than continuing to
+   explore.
    ```
 
 3. **Validate output:**
