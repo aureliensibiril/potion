@@ -413,7 +413,7 @@ Adapt strategy based on codebase size:
 | Small (<100 files) | 1-3 | Sequential, all at once | Full exploration, no batching needed |
 | Medium (100-500) | 3-8 | Parallel, all at once | Launch all explorers in the same turn |
 | Large (500-2000) | 8-15 | Batch in groups of 3-5 | Interleave batches with early synthesis |
-| Very large (2000+) | 15+ | Top 10 by importance, skim rest | Ask user to prioritize; limit Phase 1 to 3 levels deep |
+| Very large (2000+) | 15+ | Top 10 by importance, skim rest | Ask user to prioritize; scan up to 6-8 levels for DDD/monorepo |
 
 Additional tips:
 - Existing CLAUDE.md or ARCHITECTURE.md: read first, shortcut discovery

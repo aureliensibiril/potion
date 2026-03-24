@@ -37,7 +37,8 @@ Work in concentric circles — broad first, then targeted.
 
 ### Step 1: Structural scan
 
-Map the directory tree 2-3 levels deep. Look for:
+Map the directory tree 6-8 levels deep. DDD architectures, monorepos, and
+layered codebases often have significant structure at depth 6+. Look for:
 - Package manifests (package.json, Cargo.toml, go.mod, pyproject.toml, pom.xml)
 - Monorepo markers (workspaces, lerna.json, nx.json, turborepo.json)
 - Docker/compose files (each service is likely a module)
@@ -68,7 +69,7 @@ distinct internal units that warrant independent exploration.
 
 Run the tree structure script to see the internal layout:
 ```bash
-python ${CLAUDE_SKILL_DIR}/scripts/tree_structure.py --path {module_path} --depth 4
+python ${CLAUDE_SKILL_DIR}/scripts/tree_structure.py --path {module_path} --depth 8
 ```
 
 Then look for **structural signals** — do NOT match against a fixed list of
@@ -125,7 +126,8 @@ Return ONLY a JSON object matching this schema. No markdown. No explanation.
           "boundary_type": "string — describe the pattern: hexagonal, feature-folders, vertical-slices, etc.",
           "estimated_size": "small | medium | large",
           "has_tests": true,
-          "notes": "string"
+          "notes": "string",
+          "submodules": ["...recursive — same schema, for nested boundaries (DDD aggregates, bounded contexts, etc.)"]
         }
       ]
     }
