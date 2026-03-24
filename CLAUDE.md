@@ -16,7 +16,7 @@ The plugin follows a **5-phase pipeline** orchestrated by `skills/codebase-skill
 4. **Phase 4 — Generate:** `agents/skill-writer.md` produces the final skill pack from templates + guidelines
 5. **Phase 5 — Evaluate (optional):** Structured evaluation with assertions, with/without-skill comparison, description trigger testing, and iteration
 
-Each phase has a **human-in-the-loop gate** where the user validates findings before proceeding. Phases save to `.claude/skill-gen-workspace/` for resumability.
+Each phase has a **human-in-the-loop gate** where the user validates findings before proceeding. Phases save to `.skill-gen-workspace/` for resumability.
 
 ### Key design decisions
 

@@ -66,7 +66,7 @@ only when you need to check a schema. Do not read the full files upfront.
    Use $ARGUMENTS if provided (Claude Code injects the skill's argument
    string, e.g. `/codebase-skill-generator /path/to/project`), otherwise
    the current working directory.
-2. Create workspace: `{project_root}/.claude/skill-gen-workspace/`
+2. Create workspace: `{project_root}/.skill-gen-workspace/`
 3. Initialize `state.json` in the workspace following the schema in
    `references/output-schemas.md § State`:
    ```json
@@ -228,7 +228,7 @@ Display all generated files for review. Do not install or copy anything.
 ## Workspace layout
 
 ```
-.claude/skill-gen-workspace/
+.skill-gen-workspace/
 ├── state.json
 ├── phase1-module-map.json
 ├── phase2-profiles/
