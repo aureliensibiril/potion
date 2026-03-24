@@ -217,10 +217,31 @@ The skill-writer has already generated the plugin structure inside
 
 2. **Copy the plugin** to the project:
    ```bash
+   mkdir -p {project_root}/.claude/plugins
    cp -r {workspace}/phase4-output/potion/ {project_root}/.claude/plugins/potion/
    ```
 
-3. **Update the project's CLAUDE.md** to reference the generated skills.
+3. **Register the plugin** so Claude Code discovers it. Read the current
+   `~/.claude/plugins/installed_plugins.json`, add a new entry for the plugin,
+   then write it back:
+
+   ```json
+   "potion@local": [
+     {
+       "scope": "local",
+       "installPath": "{project_root}/.claude/plugins/potion",
+       "version": "1.0.0",
+       "installedAt": "<ISO 8601 now>",
+       "lastUpdated": "<ISO 8601 now>",
+       "projectPath": "{project_root}"
+     }
+   ]
+   ```
+
+   Add this entry to the `plugins` object in `installed_plugins.json`.
+   **Do not overwrite or remove existing entries** — read-modify-write.
+
+4. **Update the project's CLAUDE.md** to reference the generated skills.
    Read `references/phases.md § Delivery` for the CLAUDE.md update procedure.
 
 4. **Show activation instructions:**
