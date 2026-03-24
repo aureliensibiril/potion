@@ -8,7 +8,7 @@ description: >
   explorer, planner, implementer, and reviewer agents — all tailored to the
   target project's patterns, conventions, and architecture. Handles both
   install mode (loose files) and plugin mode (distributable package).
-tools: Read, Write, Edit, Glob, Grep
+tools: Read, Write, Edit, Glob, Grep, Bash
 model: sonnet
 effort: high
 maxTurns: 30
@@ -104,6 +104,16 @@ Replace all guidelines references with `${CLAUDE_PLUGIN_ROOT}/guidelines.md`
 instead of `.claude/guidelines.md`.
 
 ### 3. Generate plugin.json
+
+**Important:** Before writing any files in the plugin directory, create the
+directory structure first using Bash. The `.claude-plugin/` directory in
+particular may fail with `Write` alone:
+
+```bash
+mkdir -p {output_dir}/potion/.claude-plugin
+mkdir -p {output_dir}/potion/skills/{ask,plan,implement,review}
+mkdir -p {output_dir}/potion/agents
+```
 
 The plugin is always named `"potion"` — this is the generator's brand, not the
 target project's name. Create `.claude-plugin/plugin.json` with:
