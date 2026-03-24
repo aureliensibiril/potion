@@ -1,0 +1,351 @@
+---
+name: codebase-skill-generator
+description: >
+  Analyzes any codebase and generates a complete, tailored skill pack — coding
+  skills, review agents, Q&A agents, and a shared guidelines document, all
+  grounded in the actual architecture and patterns of the target project.
+  This skill should be used when the user asks to "generate skills for this
+  codebase", "create agents for this project", "create onboarding agents",
+  "make a skill pack", "analyze this repo and build dev workflows", "package
+  codebase knowledge", "I want Claude to understand this project", or "create
+  a dev workflow for this repo". It also triggers when the user says "help my
+  team work with this codebase" or mentions wanting to distribute project
+  knowledge as skills or agents. Additional triggers: "refresh skills",
+  "update the skill pack", "re-analyze this codebase".
+effort: high
+argument-hint: "[project-root-path]"
+---
+
+# Codebase Skill Generator
+
+Analyze a codebase and produce a ready-to-use skill pack that any team member
+can install. The pack includes skills for asking questions, implementing features,
+and reviewing code — all grounded in the project's real patterns.
+
+## When to use this skill
+
+- User wants to generate skills/agents tailored to a specific codebase
+- User wants to onboard their team onto a project via Claude Code
+- User wants a guidelines document that captures codebase knowledge
+- User wants to distribute project conventions as reusable agents
+
+## What gets generated
+
+| Output                  | Purpose                                          |
+|-------------------------|--------------------------------------------------|
+| `guidelines.md` (or `guidelines/`) | Shared codebase knowledge: architecture, patterns, conventions |
+| `skills/ask/SKILL.md`   | Q&A skill — answers questions about the codebase |
+| `skills/plan/SKILL.md`  | Planning skill — designs implementation approaches before coding |
+| `skills/implement/SKILL.md` | Coding skill — implements features following project patterns |
+| `skills/review/SKILL.md`    | Review skill — reviews code against project standards |
+| `agents/explorer.md`    | Read-only agent for codebase navigation          |
+| `agents/planner.md`     | Planning agent for complex feature design        |
+| `agents/implementer.md` | Write agent scoped to project conventions        |
+| `agents/reviewer.md`    | Review agent with checklist from actual patterns |
+| `agents/reviewers/`     | Specialized reviewer sub-agents (optional, for larger projects) |
+| `test-prompts.md`       | Sample prompts for evaluating generated skills    |
+
+## Pipeline overview
+
+The generation runs in 5 phases. Each phase saves its output to a workspace
+so the user can inspect, correct, and resume at any point.
+
+```
+Phase 1: DISCOVER     → module-mapper agent     → module-map.json
+Phase 2: EXPLORE      → module-explorer agents   → per-module profiles
+Phase 3: SYNTHESIZE   → pattern-synthesizer agent → guidelines.md
+Phase 4: GENERATE     → skill-writer agent        → final skill pack
+Phase 5: EVALUATE     → evaluation agents         → test results + iteration
+```
+
+**Load references on demand:** When you reach a phase, read only the relevant
+`§ Phase N` section from `references/phases.md`. Read `references/output-schemas.md`
+only when you need to check a schema. Do not read the full files upfront.
+
+## Quick context
+
+!`ls -la | head -20`
+!`git log --oneline -5 2>/dev/null || echo "Not a git repo"`
+!`cat README.md 2>/dev/null | head -5 || echo "No README"`
+
+## How to run
+
+### Setup
+
+1. Get the project root from the user (default: current directory).
+   Use $ARGUMENTS if provided (Claude Code injects the skill's argument
+   string, e.g. `/codebase-skill-generator /path/to/project`), otherwise
+   the current working directory.
+2. Create workspace: `{project_root}/.claude/skill-gen-workspace/`
+3. Initialize `state.json` in the workspace following the schema in
+   `references/output-schemas.md § State`:
+   ```json
+   {
+     "started_at": "<ISO 8601>",
+     "updated_at": "<ISO 8601>",
+     "project_root": "<absolute path>",
+     "phases": {
+       "1": { "status": "pending", "started_at": null, "completed_at": null, "output_file": null, "error": null },
+       "2": { "status": "pending", "started_at": null, "completed_at": null, "output_file": null, "error": null, "module_statuses": {} },
+       "3": { "status": "pending", "started_at": null, "completed_at": null, "output_file": null, "error": null },
+       "4": { "status": "pending", "started_at": null, "completed_at": null, "output_file": null, "error": null },
+       "5": { "status": "pending", "started_at": null, "completed_at": null, "output_file": null, "error": null }
+     },
+     "user_choices": {
+       "selected_outputs": [],
+       "skip_evaluation": false,
+       "delivery_mode": "plugin",
+       "guidelines_mode": null
+     }
+   }
+   ```
+4. Check for existing workspace — if `state.json` exists, read it and offer to
+   resume from the first non-completed phase.
+
+### Phase 1: Module Discovery
+
+Delegate to the **module-mapper** agent. It scans the codebase structure and
+returns a JSON module map. Read `references/phases.md § Phase 1` for the full
+procedure including the user validation step.
+
+Update `state.json`: set `phases.1.status` to `"in_progress"` and `phases.1.started_at`
+at start. Set `"completed"` and `phases.1.completed_at` on success, or `"failed"` with
+`phases.1.error` on failure. Always update `updated_at`.
+
+### Phase 2: Module Exploration + Documentation Discovery
+
+Build the exploration list from Phase 1: for modules with `submodules`, explore
+each submodule independently (not the parent). For modules without submodules,
+explore the module itself.
+
+Spawn **all module-explorer agents AND the doc-scanner agent** in parallel.
+The doc-scanner discovers existing documentation (Cursor rules, CLAUDE.md, ADRs,
+config files) and saves to `{workspace}/phase2-docs.json`. Read
+`references/phases.md § Phase 2` for batching rules and how to present findings.
+
+Update `state.json`: set `phases.2.status` to `"in_progress"` at start. Track each
+unit in `phases.2.module_statuses` using `{parent}/{submodule}` keys for submodules
+and `"doc_scanner"` for the doc-scanner. Set phase status to `"completed"` when all
+units succeed, or `"failed"` with error if any fail — but keep successful profiles
+so they can be reused on retry. Always update `updated_at`.
+
+### Phase 3: Pattern Synthesis
+
+First, select the guidelines mode. Count the total exploration units (modules
+without submodules + individual submodules). If >= 8 units, use `"multi"` mode;
+otherwise `"single"`. Store in `state.json.user_choices.guidelines_mode`.
+
+Delegate to the **pattern-synthesizer** agent with all module profiles AND
+the documentation profile (`phase2-docs.json`) from the doc-scanner.
+
+- **Single mode:** produces `phase3-guidelines.md`
+- **Multi mode:** produces `phase3-guidelines/` directory with topic files
+
+Pass `guidelines_mode` to the synthesizer. Read `references/phases.md § Phase 3`
+for the synthesis process and quality checks.
+
+Update `state.json`: set `phases.3.status` to `"in_progress"` at start, `"completed"`
+on success, or `"failed"` with error. Always update `updated_at`.
+
+### Phase 4: Skill Pack Generation
+
+Ask the user which outputs to generate (default: all). Delegate to the
+**skill-writer** agent. Read `references/phases.md § Phase 4` for generation
+details.
+
+Update `state.json`: set `phases.4.status` to `"in_progress"` at start, `"completed"`
+on success, or `"failed"` with error. Always update `updated_at`.
+
+### Phase 5: Evaluation
+
+Before delivering, test the generated skills. This step is optional but strongly
+recommended. Ask the user if they want to run the evaluation or skip it.
+
+1. Build eval plans (`evals.json`) with assertions for each skill/agent.
+2. Run with/without-skill comparison: spawn agents WITH and WITHOUT the skill
+   for each eval prompt. Compare output quality.
+3. Run description trigger tests: verify skills activate for intended prompts
+   and don't activate for unrelated ones.
+4. Grade responses against assertions. Iterate on failures (up to 3 rounds).
+5. Save results to `phase5-workspace/` and `phase5-evaluation.json`.
+
+Read `references/phases.md § Phase 5` for the full evaluation procedure.
+
+Update `state.json`: set `phases.5.status` to `"in_progress"` at start, `"completed"`
+on success, `"skipped"` if the user opts out, or `"failed"` with error. Always
+update `updated_at`.
+
+### Delivery
+
+Read `state.json.user_choices.delivery_mode` to determine the delivery method.
+
+#### If delivery_mode is "install"
+
+Before installing, check for conflicts with existing files at the target paths.
+
+1. **Scan target paths** for existing files:
+   - `{project_root}/.claude/skills/`
+   - `{project_root}/.claude/agents/`
+   - `{project_root}/.claude/guidelines.md`
+
+2. **If conflicts found**, warn the user and offer options:
+   - **Backup + install:** Move existing files to `{project_root}/.claude/backup-{timestamp}/` then install
+   - **Overwrite:** Replace existing files without backup
+   - **Merge** (for `guidelines.md` only): Attempt to merge new guidelines into existing, preserving user edits
+   - **Cancel:** Abort delivery so the user can handle it manually
+
+3. **Install the pack:**
+   ```bash
+   cp -r {workspace}/phase4-output/skills/ {project_root}/.claude/skills/
+   cp -r {workspace}/phase4-output/agents/ {project_root}/.claude/agents/
+   cp {workspace}/phase4-output/guidelines.md {project_root}/.claude/guidelines.md
+   ```
+
+#### If delivery_mode is "plugin" (default)
+
+The skill-writer has already generated the plugin structure inside
+`phase4-output/potion/`.
+
+1. **Validate the plugin:**
+   ```bash
+   python ${CLAUDE_SKILL_DIR}/scripts/validate_output.py \
+     --phase 4 --workspace {workspace} --delivery-mode plugin
+   ```
+
+2. **Copy the plugin** to the project:
+   ```bash
+   cp -r {workspace}/phase4-output/potion/ {project_root}/.claude/plugins/potion/
+   ```
+
+3. **Update the project's CLAUDE.md** to reference the generated skills.
+   Read `references/phases.md § Delivery` for the CLAUDE.md update procedure.
+
+4. **Show activation instructions:**
+   ```
+   Plugin installed at {project_root}/.claude/plugins/potion/
+
+   Skills available as:
+     /potion:ask       — Ask questions about this codebase
+     /potion:plan      — Plan features before implementing
+     /potion:implement — Implement following project patterns
+     /potion:review    — Review code against project standards
+   ```
+
+#### If delivery_mode is "review-only"
+
+Display all generated files for review. Do not install or copy anything.
+
+## Workspace layout
+
+```
+.claude/skill-gen-workspace/
+├── state.json
+├── phase1-module-map.json
+├── phase2-profiles/
+│   ├── frontend.json                       # top-level module profiles
+│   ├── backend-billing.json                # submodule profiles: {parent}-{sub}.json
+│   ├── backend-card-market.json
+│   └── ...
+├── phase2-docs.json                        # documentation profile from doc-scanner
+├── phase3-guidelines.md                    # single-file mode
+├── phase3-guidelines/                      # multi-file mode (alternative)
+│   ├── index.md
+│   ├── architecture.md
+│   ├── patterns.md
+│   ├── conventions.md
+│   ├── testing.md
+│   ├── pitfalls.md
+│   └── module-notes/
+├── phase4-output/                          # install mode layout:
+│   ├── guidelines.md
+│   ├── skills/{ask,implement,review}/SKILL.md
+│   ├── agents/{explorer,implementer,reviewer}.md
+│   ├── test-prompts.md
+│   ├── manifest.json
+│   └── potion/                              # plugin mode layout (default):
+│       ├── .claude-plugin/plugin.json
+│       ├── skills/{ask,implement,review}/SKILL.md
+│       ├── agents/{explorer,implementer,reviewer}.md
+│       ├── guidelines.md
+│       ├── test-prompts.md
+│       └── README.md
+├── phase5-workspace/
+│   ├── evals/{skill}-evals.json
+│   └── iteration-{N}/{skill}/eval-{id}/
+│       ├── with_skill/output.md
+│       └── without_skill/output.md
+└── phase5-evaluation.json
+```
+
+## Handling user interaction
+
+Follow the doc-coauthoring pattern: at each phase boundary, present findings
+and ask for validation before proceeding. The user knows their codebase better
+than the agents — their corrections are the most valuable input.
+
+### Confidence-based gates
+
+Apply confidence per-finding, not per-phase. A phase can have high-confidence
+modules that get brief treatment and low-confidence modules that get detailed
+review.
+
+| Confidence | Criteria | Gate depth |
+|-----------|---------|------------|
+| High | Standard patterns, clear boundaries, strong documentation | Brief summary, proceed unless objections |
+| Medium | Some ambiguity, mixed patterns, sparse docs | Present findings with questions, wait for response |
+| Low | Unusual architecture, conflicting patterns, no docs | Detailed presentation, explicit approval required |
+
+### Gate prompts
+
+**Phase 1 → 2 gate:** "Does this module breakdown look right?"
+**Phase 2 → 3 gate:** "Here are the patterns I found. Anything to correct?"
+**Phase 3 → 4 gate:** "Here's the guidelines document. Review before I generate skills."
+**Phase 4 → 5 gate:** "Here's the skill pack. Want to run evaluation tests?"
+**Phase 5 → delivery:** "Evaluation complete. Here are the results — ready to install?"
+
+If the user says "just do it" or wants to skip validation, that's fine — proceed
+without gates. Adapt to their pace.
+
+## Refresh mode
+
+When the user already has a generated skill pack and wants to update it after
+codebase changes, use refresh mode instead of regenerating from scratch.
+
+**Triggers:** "refresh skills", "update the skill pack", "re-analyze this codebase",
+or when an existing workspace with completed phases is detected.
+
+**How it works:**
+1. Detect what changed (git diff or directory comparison against module map)
+2. Re-explore only changed modules (selective Phase 2)
+3. Merge new findings into existing guidelines, preserving `<!-- user-edited -->` sections
+4. Regenerate affected skills, showing diffs instead of full documents
+5. Run evaluation on changed skills only
+
+Read `references/phases.md § Refresh Mode` for the full procedure.
+
+## Scaling rules
+
+Adapt strategy based on codebase size:
+
+| Codebase size | Modules | Phase 2 strategy | Notes |
+|--------------|---------|-------------------|-------|
+| Small (<100 files) | 1-3 | Sequential, all at once | Full exploration, no batching needed |
+| Medium (100-500) | 3-8 | Parallel, all at once | Launch all explorers in the same turn |
+| Large (500-2000) | 8-15 | Batch in groups of 3-5 | Interleave batches with early synthesis |
+| Very large (2000+) | 15+ | Top 10 by importance, skim rest | Ask user to prioritize; limit Phase 1 to 3 levels deep |
+
+Additional tips:
+- Existing CLAUDE.md or ARCHITECTURE.md: read first, shortcut discovery
+- Monorepo: treat each workspace member as a separate module
+- If agent times out: reduce scope, ask user to identify top directories
+
+## References
+
+- **[`references/phases.md`](references/phases.md)** — Detailed phase-by-phase
+  instructions, user interaction scripts, error handling
+- **[`references/output-schemas.md`](references/output-schemas.md)** — JSON
+  contracts for all agent inputs/outputs
+- **[`assets/templates/`](assets/templates/)** — Starter templates for generated
+  skills and agents
+- **[`scripts/validate_output.py`](scripts/validate_output.py)** — Validates
+  outputs between phases
