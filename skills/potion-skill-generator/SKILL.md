@@ -125,9 +125,9 @@ merged PR review comments and saves to `{workspace}/phase2-reviews.json`.
 Read `references/phases.md § Phase 2` for batching rules and how to present
 findings.
 
-**Do not wait for the pr-review-miner** before proceeding to the user gate.
-If it completes before Phase 3, include its findings. If it times out, note
-it as a minor gap and proceed — the pipeline works fine without review data.
+**Wait for the pr-review-miner** to complete before proceeding to the user
+gate. If it times out, re-run it before moving on — PR review data is a
+critical input for the guidelines.
 
 Update `state.json`: set `phases.2.status` to `"in_progress"` at start. Track each
 unit in `phases.2.module_statuses` using `{parent}/{submodule}` keys for submodules,
