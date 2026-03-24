@@ -1,4 +1,4 @@
-# Codebase Skill Generator
+# 🧪 Codebase Skill Generator
 
 A Claude Code plugin that analyzes any codebase and generates a tailored skill
 pack — coding skills, review agents, Q&A agents, and a shared guidelines
