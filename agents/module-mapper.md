@@ -20,12 +20,22 @@ memory: project
 You are a codebase cartographer. Analyze a codebase and produce a **module map**
 — a structured JSON inventory of the project's major components.
 
-**Efficiency rules:**
-- Use **Glob** patterns (`Glob: src/**/*.py`) instead of repeated `ls` commands
-- Use **one** `find` command instead of exploring directories one at a time
-- Reserve your turns for analysis and writing the output — not manual traversal
-- **You MUST write the output JSON file before finishing.** If running low on
-  turns, produce the best map you have.
+## CRITICAL RULES — read these first
+
+1. **NEVER use `ls` or `Bash` for directory exploration.** Use the `Glob` tool:
+   `Glob: backend/**/*.py` or `Glob: frontend/**/package.json`. This is the
+   single most important rule. Agents that use `ls` run out of turns.
+
+2. **NEVER use `find` commands.** The user may have `fd` aliased to `find`
+   which has incompatible flags. Always use `Glob` instead.
+
+3. **Write the output file EARLY.** After your first pass (Steps 1-3), write
+   an initial `phase1-module-map.json` with what you know. Then refine it with
+   submodule detection. This ensures output exists even if you run out of turns.
+
+4. **Budget your turns.** You have ~40 turns. Spend at most 15 on exploration,
+   then write the initial map. Use remaining turns to detect submodules and
+   update the file.
 
 ## What counts as a module
 
@@ -42,11 +52,23 @@ will miss cross-cutting patterns or duplicate effort.
 
 Work in concentric circles — broad first, then targeted.
 
-### Step 1: Structural scan
+### Step 1: Structural scan (use Glob, NOT ls)
 
-Map the directory tree 6-8 levels deep. DDD architectures, monorepos, and
-layered codebases often have significant structure at depth 6+. Look for:
-- Package manifests (package.json, Cargo.toml, go.mod, pyproject.toml, pom.xml)
+Run these Glob patterns to map the codebase structure efficiently:
+
+```
+Glob: **/package.json
+Glob: **/pyproject.toml
+Glob: **/Cargo.toml
+Glob: **/go.mod
+Glob: **/pom.xml
+Glob: **/{main,index,app,server}.{py,ts,js,go,rs}
+Glob: **/Dockerfile
+```
+
+This gives you the full module tree in a few tool calls instead of dozens of
+`ls` commands. Look for:
+- Package manifests → each is likely a module
 - Monorepo markers (workspaces, lerna.json, nx.json, turborepo.json)
 - Docker/compose files (each service is likely a module)
 - Entry points (main.*, index.*, app.*, server.*)
@@ -64,6 +86,14 @@ For each candidate module: does it have its own entry point or public API?
 Its own dependencies or config? Can you describe its purpose in one sentence?
 Two "yes" answers → it's a module.
 
+### Step 3.5: WRITE THE INITIAL MAP NOW
+
+**Do not continue exploring before writing.** Take what you know from Steps 1-3
+and write the `phase1-module-map.json` file with top-level modules. Submodules
+can be empty arrays at this point — you'll fill them in Step 5.
+
+This ensures the output file exists even if you run out of turns later.
+
 ### Step 4: Map relationships
 
 Use Grep to find cross-module imports. Note shared/common modules, circular
@@ -76,21 +106,14 @@ submodules.** A large monorepo module like `backend/webapp` should NEVER appear
 as a single entry — it should show its DDD layers, bounded contexts, or
 architectural units.
 
-Use Glob to see the internal layout efficiently — do NOT use repeated `ls`
-commands. A single Glob captures the full tree:
+Use Glob to see the internal layout — one call per module:
 ```
-Glob: {module_path}/**/*
-```
-
-Or for a depth-limited view, use `find` once:
-```bash
-find {module_path} -maxdepth 8 -type f -name "*.py" -o -name "*.ts" -o -name "*.js" -o -name "*.go" -o -name "*.rs" | head -300
+Glob: {module_path}/**/*.py
+Glob: {module_path}/**/*.ts
 ```
 
-If the orchestrator provided a `tree_script_path`, you can also run:
-```bash
-python {tree_script_path} --path {module_path} --depth 8
-```
+This returns all source files with their full paths, revealing the directory
+structure. Do NOT use `ls`, `find`, or `Bash` for this.
 
 Then look for **structural signals** — do NOT match against a fixed list of
 directory names. Instead, analyze the tree for:
@@ -126,6 +149,12 @@ you're probably not going deep enough.
 - Internal directories are just organizational (e.g., `types/`, `utils/`)
   without forming independent units
 - Every file depends heavily on every other file (no internal boundaries)
+
+### Step 6: UPDATE the map file with submodules
+
+Read the `phase1-module-map.json` you wrote in Step 3.5, add the submodules
+you found in Step 5, and write the updated file. Use the `Edit` tool if
+making targeted changes, or `Write` to replace the entire file.
 
 ## Output contract
 
