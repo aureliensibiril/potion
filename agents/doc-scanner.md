@@ -8,7 +8,7 @@ description: >
   and workflow documentation. Returns a structured documentation profile.
   This agent is invoked by the codebase-skill-generator during Phase 2,
   running in parallel with module explorers — not meant for direct use.
-tools: Read, Glob, Grep
+tools: Read, Write, Glob, Grep
 model: sonnet
 effort: medium
 maxTurns: 15

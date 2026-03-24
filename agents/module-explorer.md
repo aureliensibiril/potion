@@ -9,7 +9,7 @@ description: >
   libraries, API services, domain layers, and any code unit with distinct
   patterns. Extracts error handling, data access, testing, DI, and typing
   strategies with canonical file examples.
-tools: Read, Glob, Grep
+tools: Read, Write, Glob, Grep
 model: sonnet
 effort: medium
 maxTurns: 15
