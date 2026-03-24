@@ -14,7 +14,7 @@
         "url": "git@github.com:aureliensibiril/potion.git"
       },
       "description": "Analyzes any codebase and generates a tailored skill pack — coding, review, and Q&A skills plus shared guidelines.",
-      "version": "1.7.0",
+      "version": "1.8.0",
       "keywords": ["codebase-analysis", "skill-generation", "onboarding", "code-review"]
     }
   ]
