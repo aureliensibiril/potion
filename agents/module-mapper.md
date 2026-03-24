@@ -4,7 +4,7 @@ color: cyan
 description: >
   Analyzes a codebase's structure to identify distinct modules, services, and
   packages. Returns a structured module map as JSON. This agent is invoked by
-  the codebase-skill-generator during Phase 1 — not meant for direct user use.
+  the potion-skill-generator during Phase 1 — not meant for direct user use.
   Handles monorepos (Turborepo, Nx, Lerna), Django modular-monoliths, Rust
   workspaces with multiple crates, microservice architectures, and any
   project layout with identifiable module boundaries.

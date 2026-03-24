@@ -6,7 +6,7 @@ description: >
   developer instructions. Discovers AI agent rules (Cursor, CLAUDE.md,
   Copilot), architecture decision records, style guides, convention configs,
   and workflow documentation. Returns a structured documentation profile.
-  This agent is invoked by the codebase-skill-generator during Phase 2,
+  This agent is invoked by the potion-skill-generator during Phase 2,
   running in parallel with module explorers — not meant for direct use.
 tools: Read, Write, Glob, Grep
 model: sonnet

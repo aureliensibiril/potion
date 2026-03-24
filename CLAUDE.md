@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Architecture
 
-The plugin follows a **5-phase pipeline** orchestrated by `skills/codebase-skill-generator/SKILL.md`:
+The plugin follows a **5-phase pipeline** orchestrated by `skills/potion-skill-generator/SKILL.md`:
 
 1. **Phase 1 — Discover:** `agents/module-mapper.md` scans the codebase and produces `module-map.json`
 2. **Phase 2 — Explore:** `agents/module-explorer.md` (one per module, run in parallel) produces per-module JSON profiles
@@ -35,7 +35,7 @@ agents/                                 # Subagent definitions (YAML frontmatter
   doc-scanner.md                        # Phase 2 agent (documentation discovery)
   pattern-synthesizer.md                # Phase 3 agent
   skill-writer.md                       # Phase 4 agent
-skills/codebase-skill-generator/
+skills/potion-skill-generator/
   SKILL.md                              # Main orchestrator skill
   references/phases.md                  # Detailed phase-by-phase instructions
   references/output-schemas.md          # JSON contracts for all agent I/O
@@ -52,7 +52,7 @@ skills/codebase-skill-generator/
 
 Run inter-phase validation with:
 ```bash
-python skills/codebase-skill-generator/scripts/validate_output.py --phase {1|2|3|4|5|all} --workspace <path>
+python skills/potion-skill-generator/scripts/validate_output.py --phase {1|2|3|4|5|all} --workspace <path>
 ```
 
 Add `--project-root <path>` to verify file paths referenced in outputs exist on disk.

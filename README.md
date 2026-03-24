@@ -29,7 +29,7 @@ document — all grounded in the project's actual architecture and patterns.
 /plugin marketplace add aureliensibiril/potion
 
 # Install the plugin
-/plugin install codebase-skill-generator@aureliensibiril-potion
+/plugin install potion-skill-generator@aureliensibiril-potion
 ```
 
 ### Manual installation
@@ -37,13 +37,13 @@ document — all grounded in the project's actual architecture and patterns.
 Clone into your project's `.claude/plugins/` directory:
 
 ```bash
-git clone https://github.com/aureliensibiril/potion.git <project-root>/.claude/plugins/codebase-skill-generator
+git clone https://github.com/aureliensibiril/potion.git <project-root>/.claude/plugins/potion-skill-generator
 ```
 
 Or for global installation across all projects:
 
 ```bash
-git clone https://github.com/aureliensibiril/potion.git ~/.claude/plugins/codebase-skill-generator
+git clone https://github.com/aureliensibiril/potion.git ~/.claude/plugins/potion-skill-generator
 ```
 
 ## Usage
@@ -95,11 +95,11 @@ at any point.
 ## Plugin structure
 
 ```
-codebase-skill-generator/
+potion-skill-generator/
 ├── .claude-plugin/
 │   └── plugin.json                         # Plugin manifest
 ├── skills/
-│   └── codebase-skill-generator/
+│   └── potion-skill-generator/
 │       ├── SKILL.md                        # Orchestrator
 │       ├── references/
 │       │   ├── phases.md                   # Detailed phase instructions

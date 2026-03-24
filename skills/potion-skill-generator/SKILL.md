@@ -1,5 +1,5 @@
 ---
-name: codebase-skill-generator
+name: potion-skill-generator
 description: "Analyzes any codebase and generates a complete, tailored skill pack — coding skills, review agents, Q&A agents, and a shared guidelines document, all grounded in the actual architecture and patterns of the target project. Use when the user asks to generate skills, create agents, make a skill pack, analyze a repo, package codebase knowledge, or create dev workflows. Also triggers on: refresh skills, update the skill pack, re-analyze this codebase."
 effort: high
 argument-hint: "[project-root-path]"
@@ -64,7 +64,7 @@ only when you need to check a schema. Do not read the full files upfront.
 
 1. Get the project root from the user (default: current directory).
    Use $ARGUMENTS if provided (Claude Code injects the skill's argument
-   string, e.g. `/codebase-skill-generator /path/to/project`), otherwise
+   string, e.g. `/potion-skill-generator /path/to/project`), otherwise
    the current working directory.
 2. Create workspace: `{project_root}/.skill-gen-workspace/`
 3. Initialize `state.json` in the workspace following the schema in

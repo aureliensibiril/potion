@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Validate codebase-skill-generator outputs between phases.
+Validate potion-skill-generator outputs between phases.
 
 Usage:
     python validate_output.py --phase 1 --workspace ./skill-gen-workspace

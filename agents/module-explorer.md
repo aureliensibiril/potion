@@ -4,7 +4,7 @@ color: blue
 description: >
   Performs a deep-dive into a single codebase module to extract patterns,
   conventions, and architecture. Returns a structured module profile as JSON.
-  This agent is invoked by the codebase-skill-generator during Phase 2 — not
+  This agent is invoked by the potion-skill-generator during Phase 2 — not
   meant for direct use. Covers auth modules, data pipelines, component
   libraries, API services, domain layers, and any code unit with distinct
   patterns. Extracts error handling, data access, testing, DI, and typing
