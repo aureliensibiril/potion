@@ -84,7 +84,7 @@ only when you need to check a schema. Do not read the full files upfront.
      "user_choices": {
        "selected_outputs": [],
        "skip_evaluation": false,
-       "delivery_mode": "install",
+       "delivery_mode": "standalone",
        "guidelines_mode": null
      }
    }
@@ -182,14 +182,18 @@ update `updated_at`.
 
 Read `state.json.user_choices.delivery_mode` to determine the delivery method.
 
-#### If delivery_mode is "install"
+#### If delivery_mode is "standalone" (default)
+
+Standalone mode places skills, agents, and guidelines directly in `.claude/`
+where Claude Code auto-discovers them. Skill names are prefixed with `potion-`
+to avoid conflicts (e.g., `/potion-ask`, `/potion-review`).
 
 Before installing, check for conflicts with existing files at the target paths.
 
 1. **Scan target paths** for existing files:
-   - `{project_root}/.claude/skills/`
-   - `{project_root}/.claude/agents/`
-   - `{project_root}/.claude/guidelines.md`
+   - `{project_root}/.claude/skills/potion-*`
+   - `{project_root}/.claude/agents/potion-*`
+   - `{project_root}/.claude/guidelines/` or `{project_root}/.claude/guidelines.md`
 
 2. **If conflicts found**, warn the user and offer options:
    - **Backup + install:** Move existing files to `{project_root}/.claude/backup-{timestamp}/` then install
@@ -199,47 +203,21 @@ Before installing, check for conflicts with existing files at the target paths.
 
 3. **Install the pack:**
    ```bash
-   cp -r {workspace}/phase4-output/skills/ {project_root}/.claude/skills/
+   mkdir -p {project_root}/.claude/skills {project_root}/.claude/agents
+   cp -r {workspace}/phase4-output/skills/potion-ask/ {project_root}/.claude/skills/potion-ask/
+   cp -r {workspace}/phase4-output/skills/potion-plan/ {project_root}/.claude/skills/potion-plan/
+   cp -r {workspace}/phase4-output/skills/potion-implement/ {project_root}/.claude/skills/potion-implement/
+   cp -r {workspace}/phase4-output/skills/potion-review/ {project_root}/.claude/skills/potion-review/
    cp -r {workspace}/phase4-output/agents/ {project_root}/.claude/agents/
+   ```
+
+   For guidelines, copy depending on mode:
+   ```bash
+   # Single-file mode:
    cp {workspace}/phase4-output/guidelines.md {project_root}/.claude/guidelines.md
+   # Multi-file mode:
+   cp -r {workspace}/phase4-output/guidelines/ {project_root}/.claude/guidelines/
    ```
-
-#### If delivery_mode is "plugin" (default)
-
-The skill-writer has already generated the plugin structure inside
-`phase4-output/potion/`.
-
-1. **Validate the plugin:**
-   ```bash
-   python ${CLAUDE_SKILL_DIR}/scripts/validate_output.py \
-     --phase 4 --workspace {workspace} --delivery-mode plugin
-   ```
-
-2. **Copy the plugin** to the project:
-   ```bash
-   mkdir -p {project_root}/.claude/plugins
-   cp -r {workspace}/phase4-output/potion/ {project_root}/.claude/plugins/potion/
-   ```
-
-3. **Register the plugin** so Claude Code discovers it. Read the current
-   `~/.claude/plugins/installed_plugins.json`, add a new entry for the plugin,
-   then write it back:
-
-   ```json
-   "potion@local": [
-     {
-       "scope": "local",
-       "installPath": "{project_root}/.claude/plugins/potion",
-       "version": "1.0.0",
-       "installedAt": "<ISO 8601 now>",
-       "lastUpdated": "<ISO 8601 now>",
-       "projectPath": "{project_root}"
-     }
-   ]
-   ```
-
-   Add this entry to the `plugins` object in `installed_plugins.json`.
-   **Do not overwrite or remove existing entries** — read-modify-write.
 
 4. **Update the project's CLAUDE.md** to reference the generated skills.
    Read `references/phases.md § Delivery` for the CLAUDE.md update procedure.
@@ -281,16 +259,16 @@ Display all generated files for review. Do not install or copy anything.
 │   ├── testing.md
 │   ├── pitfalls.md
 │   └── module-notes/
-├── phase4-output/                          # install mode layout:
-│   ├── guidelines.md
-│   ├── skills/{ask,implement,review}/SKILL.md
-│   ├── agents/{explorer,implementer,reviewer}.md
+├── phase4-output/                          # standalone mode layout (default):
+│   ├── guidelines.md (or guidelines/)
+│   ├── skills/{potion-ask,potion-plan,potion-implement,potion-review}/SKILL.md
+│   ├── agents/{explorer,planner,implementer,reviewer}.md
 │   ├── test-prompts.md
 │   ├── manifest.json
-│   └── potion/                              # plugin mode layout (default):
+│   └── potion/                              # plugin mode layout (alternative):
 │       ├── .claude-plugin/plugin.json
-│       ├── skills/{ask,implement,review}/SKILL.md
-│       ├── agents/{explorer,implementer,reviewer}.md
+│       ├── skills/{ask,plan,implement,review}/SKILL.md
+│       ├── agents/{explorer,planner,implementer,reviewer}.md
 │       ├── guidelines.md
 │       ├── test-prompts.md
 │       └── README.md
@@ -382,8 +360,8 @@ AskUserQuestion({
     multiSelect: false,
     options: [
       { label: "Run evaluation (Recommended)", description: "Test skills with realistic prompts before installing" },
-      { label: "Install to .claude/ (Recommended)", description: "Install skills/agents/guidelines directly — auto-discovered, short names like /ask" },
-      { label: "Package as plugin", description: "Distributable plugin with namespaced skills like /potion:ask — for sharing with team" },
+      { label: "Install to .claude/", description: "Auto-discovered standalone skills — /potion-ask, /potion-review, etc." },
+      { label: "Package as plugin", description: "Distributable plugin for sharing via marketplace — /potion:ask, /potion:review" },
       { label: "Review files first", description: "Show me each generated file before deciding" }
     ]
   }]

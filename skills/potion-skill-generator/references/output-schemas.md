@@ -541,7 +541,7 @@ is installed in a different location.
   "user_choices": {
     "selected_outputs": ["string — e.g. 'ask', 'implement', 'review'"],
     "skip_evaluation": "boolean",
-    "delivery_mode": "install | plugin | review-only",
+    "delivery_mode": "standalone | plugin | review-only",
     "guidelines_mode": "single | multi | null"
   }
 }

@@ -70,12 +70,38 @@ trigger for unrelated requests.
 The guidelines path depends on delivery mode AND guidelines mode:
 
 ### Single-file guidelines
-- **Install mode**: `.claude/guidelines.md`
+- **Standalone mode**: `.claude/guidelines.md`
 - **Plugin mode**: `${CLAUDE_PLUGIN_ROOT}/guidelines.md`
 
 ### Multi-file guidelines
-- **Install mode**: `.claude/guidelines/` directory
+- **Standalone mode**: `.claude/guidelines/` directory
 - **Plugin mode**: `${CLAUDE_PLUGIN_ROOT}/guidelines/` directory
+
+## Standalone mode (default)
+
+In standalone mode, skill directories are prefixed with `potion-` to avoid
+name collisions with other skills:
+
+```
+phase4-output/
+├── skills/
+│   ├── potion-ask/SKILL.md
+│   ├── potion-plan/SKILL.md
+│   ├── potion-implement/SKILL.md
+│   └── potion-review/SKILL.md
+├── agents/
+│   ├── explorer.md
+│   ├── planner.md
+│   ├── implementer.md
+│   ├── reviewer.md
+│   └── reviewers/  (optional)
+├── guidelines.md (or guidelines/)
+├── test-prompts.md
+└── manifest.json
+```
+
+Skills reference `.claude/guidelines.md` (or `.claude/guidelines/`).
+Do NOT use `${CLAUDE_PLUGIN_ROOT}` in standalone mode.
 
 Each skill should reference only the guideline files it needs:
 - **Ask skill**: reads `{guidelines}/index.md` first, drills into topic files as needed

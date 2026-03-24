@@ -477,79 +477,93 @@ Present test results to the user before final delivery.
 
 Based on `delivery_mode` in state.json:
 
-#### Direct install (delivery_mode: "install")
+#### Standalone install (delivery_mode: "standalone" — default)
+
+Standalone mode places skills, agents, and guidelines directly in `.claude/`
+where Claude Code auto-discovers them. Skill directory names are prefixed with
+`potion-` to avoid conflicts with other skills.
 
 ```bash
-cp -r {workspace}/phase4-output/skills/ {project_root}/.claude/skills/
+mkdir -p {project_root}/.claude/skills {project_root}/.claude/agents
+cp -r {workspace}/phase4-output/skills/potion-ask/ {project_root}/.claude/skills/potion-ask/
+cp -r {workspace}/phase4-output/skills/potion-plan/ {project_root}/.claude/skills/potion-plan/
+cp -r {workspace}/phase4-output/skills/potion-implement/ {project_root}/.claude/skills/potion-implement/
+cp -r {workspace}/phase4-output/skills/potion-review/ {project_root}/.claude/skills/potion-review/
 cp -r {workspace}/phase4-output/agents/ {project_root}/.claude/agents/
+
+# Guidelines (single-file or multi-file):
 cp {workspace}/phase4-output/guidelines.md {project_root}/.claude/guidelines.md
+# OR:
+cp -r {workspace}/phase4-output/guidelines/ {project_root}/.claude/guidelines/
 ```
 
-#### Plugin packaging (delivery_mode: "plugin" — default)
+These files should be committed to git so the whole team gets them.
 
-The skill-writer has already generated the plugin structure inside
-`phase4-output/potion/`.
+Update the project's CLAUDE.md — see § CLAUDE.md Update below.
 
-1. **Validate the plugin:**
+Show the user what's available:
+```
+Skills installed to .claude/ (run /reload-plugins to activate):
+  /potion-ask       — Ask questions about this codebase
+  /potion-plan      — Plan features before implementing
+  /potion-implement — Implement following project patterns
+  /potion-review    — Review code against project standards
+
+Commit .claude/skills/, .claude/agents/, and .claude/guidelines/
+to share with your team.
+```
+
+#### Plugin packaging (delivery_mode: "plugin")
+
+For distributing via a marketplace. The skill-writer generates the plugin
+structure inside `phase4-output/potion/`. Plugin skills use namespaced names
+(`/potion:ask`). See the skill-writer agent instructions for the full plugin
+directory structure.
+
+1. **Validate:**
    ```bash
    python ${CLAUDE_SKILL_DIR}/scripts/validate_output.py \
      --phase 4 --workspace {workspace} --delivery-mode plugin
    ```
 
-2. **Install the plugin to the project:**
+2. **Copy** to the project:
    ```bash
    mkdir -p {project_root}/.claude/plugins
    cp -r {workspace}/phase4-output/potion/ {project_root}/.claude/plugins/potion/
    ```
 
-3. **Register the plugin** so Claude Code discovers it. Claude Code does NOT
-   auto-discover plugins placed in `.claude/plugins/` — they must be registered
-   in `~/.claude/plugins/installed_plugins.json`.
+3. **Distribute** — team members install via marketplace or `--plugin-dir`.
 
-   Read the current `installed_plugins.json`, add this entry to the `plugins`
-   object, then write it back:
-
-   ```json
-   "potion@local": [
-     {
-       "scope": "local",
-       "installPath": "{project_root}/.claude/plugins/potion",
-       "version": "1.0.0",
-       "installedAt": "<ISO 8601 now>",
-       "lastUpdated": "<ISO 8601 now>",
-       "projectPath": "{project_root}"
-     }
-   ]
-   ```
-
-   **Important:** Read-modify-write. Do not overwrite or remove existing entries.
-   If a `"potion@local"` entry already exists for this project, update it in place.
-
-4. **Update the project's CLAUDE.md** to reference the generated skills.
-   See § CLAUDE.md Update below for the procedure.
-
-5. **Show the user what's available:**
-   ```
-   Plugin installed at {project_root}/.claude/plugins/potion/
-
-   Skills available as (run /reload-plugins to activate):
-     /potion:ask       — Ask questions about this codebase
-     /potion:plan      — Plan features before implementing
-     /potion:implement — Implement following project patterns
-     /potion:review    — Review code against project standards
-   ```
+4. **Update CLAUDE.md** — see § CLAUDE.md Update below.
 
 #### § CLAUDE.md Update
 
-After installing the plugin, update the project's CLAUDE.md to help developers
-discover and use the generated skills.
+After installing, update the project's CLAUDE.md to help developers discover
+and use the generated skills.
 
 1. **Read** `{project_root}/CLAUDE.md` (or `{project_root}/.claude/CLAUDE.md`).
    If neither exists, create `{project_root}/CLAUDE.md`.
 
 2. **Prepend** the following block at the top of the file (after any existing
-   frontmatter but before other content):
+   frontmatter but before other content). Adapt skill names based on delivery mode:
 
+   For **standalone** mode:
+   ```markdown
+   ## Potion Skills
+
+   This project has Potion-generated skills tailored to its architecture and
+   patterns. Use them instead of generic approaches:
+
+   - `/potion-ask` — Ask questions about the codebase (architecture, patterns, where things are)
+   - `/potion-plan` — Plan a feature or refactor before writing code
+   - `/potion-implement` — Implement features following this project's actual patterns
+   - `/potion-review` — Review code against this project's real standards
+
+   > Skills reference shared guidelines at `.claude/guidelines.md` (or `.claude/guidelines/`).
+   > Edit sections marked `<!-- user-edited -->` to customize.
+   ```
+
+   For **plugin** mode:
    ```markdown
    ## Potion Skills
 
