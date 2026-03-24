@@ -22,9 +22,19 @@ document — all grounded in the project's actual architecture and patterns.
 
 ## Installation
 
-### As a plugin
+### Via Claude Code plugin marketplace (recommended)
 
-Clone or copy this repository into your project's `.claude/plugins/` directory:
+```bash
+# Add the marketplace
+/plugin marketplace add aureliensibiril/potion
+
+# Install the plugin
+/plugin install codebase-skill-generator@aureliensibiril-potion
+```
+
+### Manual installation
+
+Clone into your project's `.claude/plugins/` directory:
 
 ```bash
 git clone https://github.com/aureliensibiril/potion.git <project-root>/.claude/plugins/codebase-skill-generator
