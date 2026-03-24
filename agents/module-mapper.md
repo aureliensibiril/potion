@@ -69,10 +69,12 @@ Two "yes" answers → it's a module.
 Use Grep to find cross-module imports. Note shared/common modules, circular
 dependencies (flag these), and isolated modules.
 
-### Step 5: Detect submodules
+### Step 5: Detect submodules — BE AGGRESSIVE
 
-For each module estimated as "medium" or "large", check whether it contains
-distinct internal units that warrant independent exploration.
+**Every module estimated as "medium" or "large" MUST be broken down into
+submodules.** A large monorepo module like `backend/webapp` should NEVER appear
+as a single entry — it should show its DDD layers, bounded contexts, or
+architectural units.
 
 Use Glob to see the internal layout efficiently — do NOT use repeated `ls`
 commands. A single Glob captures the full tree:
@@ -82,7 +84,7 @@ Glob: {module_path}/**/*
 
 Or for a depth-limited view, use `find` once:
 ```bash
-find {module_path} -maxdepth 8 -type f -name "*.py" -o -name "*.ts" -o -name "*.js" -o -name "*.go" -o -name "*.rs" | head -200
+find {module_path} -maxdepth 8 -type f -name "*.py" -o -name "*.ts" -o -name "*.js" -o -name "*.go" -o -name "*.rs" | head -300
 ```
 
 If the orchestrator provided a `tree_script_path`, you can also run:
@@ -102,10 +104,22 @@ directory names. Instead, analyze the tree for:
   (use Grep to check import patterns between siblings)
 - **Size:** directories large enough to warrant independent exploration
   (roughly >5 source files with meaningful logic)
+- **DDD layers:** domain/models, domain/services, domain/repositories,
+  application, infrastructure, api — each is a submodule
+- **Feature modules:** in frontends, look for app routes, feature directories,
+  service layers, component libraries, stores
 
 Any layered or modular architecture qualifies: hexagonal, clean arch, MVC,
 MVVM, vertical slices, feature folders, bounded contexts, or custom patterns.
 Describe what you observe in `boundary_type` as a free-form string.
+
+**Submodules can nest.** If a submodule is itself large (e.g., `domain/services`
+has 30+ files spanning many business domains), break it further into
+sub-submodules. DDD monorepos routinely need 3-4 levels of nesting.
+
+**Aim high.** A massive monorepo should produce 20-30+ exploration units in
+the final module map. If you're producing fewer than 15 for a large codebase,
+you're probably not going deep enough.
 
 **When NOT to add submodules:**
 - The module is small (<20 files total)
