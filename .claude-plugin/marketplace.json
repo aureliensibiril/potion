@@ -11,7 +11,7 @@
       "name": "codebase-skill-generator",
       "source": {
         "source": "url",
-        "url": "https://github.com/aureliensibiril/potion.git"
+        "url": "git@github.com:aureliensibiril/potion.git"
       },
       "description": "Analyzes any codebase and generates a tailored skill pack — coding, review, and Q&A skills plus shared guidelines.",
       "version": "1.1.0",
