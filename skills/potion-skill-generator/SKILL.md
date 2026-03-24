@@ -413,7 +413,8 @@ Adapt strategy based on codebase size:
 | Small (<100 files) | 1-3 | Sequential, all at once | Full exploration, no batching needed |
 | Medium (100-500) | 3-8 | Parallel, all at once | Launch all explorers in the same turn |
 | Large (500-2000) | 8-15 | Batch in groups of 3-5 | Interleave batches with early synthesis |
-| Very large (2000+) | 15+ | Top 10 by importance, skim rest | Ask user to prioritize; scan up to 6-8 levels for DDD/monorepo |
+| Very large (2000+) | 15-30 | Batch in groups of 5-8 | DDD monorepos can easily reach 20-30 modules; scan 6-8 levels deep |
+| Massive (5000+) | 30+ | Top 30 by importance, skim rest | Ask user to prioritize; batch in groups of 8-10 |
 
 Additional tips:
 - Existing CLAUDE.md or ARCHITECTURE.md: read first, shortcut discovery
