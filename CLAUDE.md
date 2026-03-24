@@ -23,7 +23,7 @@ Each phase has a **human-in-the-loop gate** where the user validates findings be
 - **Progressive disclosure:** SKILL.md is the lean orchestrator; detailed instructions live in `references/phases.md` and `references/output-schemas.md`
 - **Guidelines as single source of truth:** All generated skills reference one `guidelines.md` instead of duplicating knowledge
 - **Parallel exploration:** Phase 2 spawns all module-explorer agents simultaneously (batches of 3-5 for large codebases)
-- **Least-privilege agents:** Reviewer agents get read-only tools (Read, Glob, Grep). Explorer/doc-scanner agents get Read + Write (to save profiles). PR review miner gets Read + Write + Bash (for gh/glab CLI). Write-capable agents: module-mapper (Bash for tree_structure.py), pattern-synthesizer (Write for guidelines output), skill-writer (Write/Edit for generating the skill pack)
+- **Least-privilege agents:** Reviewer agents get read-only tools (Read, Glob, Grep). Explorer/doc-scanner agents get Read + Write (to save profiles). PR review miner gets Read + Write + Bash (for gh/glab CLI). Write-capable agents: module-mapper (Bash + Glob for structural scanning), pattern-synthesizer (Write for guidelines output), skill-writer (Write/Edit for generating the skill pack)
 
 ## File Layout
 
@@ -41,7 +41,7 @@ skills/potion-skill-generator/
   references/phases.md                  # Detailed phase-by-phase instructions
   references/output-schemas.md          # JSON contracts for all agent I/O
   scripts/validate_output.py            # Inter-phase output validation
-  scripts/tree_structure.py             # Filtered directory tree generator
+  scripts/tree_structure.py             # Filtered directory tree generator (manual use only)
   assets/templates/                     # Handlebars-style templates for generated outputs
     ask-skill.md, implement-skill.md, review-skill.md, plan-skill.md
     explorer-agent.md, implementer-agent.md, reviewer-agent.md, planner-agent.md

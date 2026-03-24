@@ -40,8 +40,7 @@ components, their boundaries, entry points, and relationships.
    Here is what I found from the initial scan:
    {your_initial_findings}
 
-   Tree script (optional): ${CLAUDE_SKILL_DIR}/scripts/tree_structure.py
-   Use Glob patterns for efficient directory scanning instead of repeated ls.
+   Use Glob patterns for efficient directory scanning — never ls or find.
 
    Return the module map as JSON following the schema in
    references/output-schemas.md § Module Map.
