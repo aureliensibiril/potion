@@ -1,10 +1,10 @@
 # 🧪 Potion
 
-> *"We are in a small village of indomitable Gauls who still hold out against
-> the invaders. And life is not easy for the legionaries who garrison the
-> fortified camps..."*
+> *"Nous sommes en 50 avant Jésus-Christ. Toute la Gaule est occupée par les
+> Romains... Toute ? Non ! Un village peuplé d'irréductibles Gaulois résiste
+> encore et toujours à l'envahisseur."*
 >
-> Their secret? A magic potion that gives them superhuman strength.
+> Leur secret ? Une potion magique qui leur donne une force surhumaine.
 
 **Build your own superpowers.**
 
