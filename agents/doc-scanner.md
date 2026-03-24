@@ -11,7 +11,7 @@ description: >
 tools: Read, Write, Glob, Grep
 model: sonnet
 effort: medium
-maxTurns: 15
+maxTurns: 40
 ---
 
 # Documentation Scanner

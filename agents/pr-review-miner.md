@@ -11,7 +11,7 @@ description: >
 tools: Read, Write, Bash, Glob, Grep
 model: sonnet
 effort: medium
-maxTurns: 20
+maxTurns: 50
 ---
 
 # PR Review Miner

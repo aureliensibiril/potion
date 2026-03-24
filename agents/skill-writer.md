@@ -11,7 +11,7 @@ description: >
 tools: Read, Write, Edit, Glob, Grep, Bash
 model: sonnet
 effort: high
-maxTurns: 30
+maxTurns: 60
 ---
 
 # Skill Writer
