@@ -1,17 +1,6 @@
 ---
 name: codebase-skill-generator
-description: >
-  Analyzes any codebase and generates a complete, tailored skill pack — coding
-  skills, review agents, Q&A agents, and a shared guidelines document, all
-  grounded in the actual architecture and patterns of the target project.
-  This skill should be used when the user asks to "generate skills for this
-  codebase", "create agents for this project", "create onboarding agents",
-  "make a skill pack", "analyze this repo and build dev workflows", "package
-  codebase knowledge", "I want Claude to understand this project", or "create
-  a dev workflow for this repo". It also triggers when the user says "help my
-  team work with this codebase" or mentions wanting to distribute project
-  knowledge as skills or agents. Additional triggers: "refresh skills",
-  "update the skill pack", "re-analyze this codebase".
+description: "Analyzes any codebase and generates a complete, tailored skill pack — coding skills, review agents, Q&A agents, and a shared guidelines document, all grounded in the actual architecture and patterns of the target project. Use when the user asks to generate skills, create agents, make a skill pack, analyze a repo, package codebase knowledge, or create dev workflows. Also triggers on: refresh skills, update the skill pack, re-analyze this codebase."
 effort: high
 argument-hint: "[project-root-path]"
 ---
