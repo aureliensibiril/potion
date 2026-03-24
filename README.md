@@ -1,46 +1,43 @@
-# 🧪 Codebase Skill Generator
+# 🧪 Potion
 
-A Claude Code plugin that analyzes any codebase and generates a tailored skill
-pack — coding skills, review agents, Q&A agents, and a shared guidelines
-document — all grounded in the project's actual architecture and patterns.
+**Build your own superpowers.**
 
-## What it produces
+Potion is a Claude Code plugin that reads your codebase — its architecture,
+patterns, conventions, review culture — and generates a skill pack tailored
+to that project. The result is a set of skills and agents that actually know
+how *your* team writes code, not generic best practices from a training set.
 
-| Output | Description |
-|--------|-------------|
-| `guidelines.md` (or `guidelines/`) | Shared knowledge: architecture, patterns, conventions, pitfalls |
-| `skills/ask/` | Q&A skill — answers questions about the codebase |
-| `skills/plan/` | Planning skill — designs implementation approaches |
-| `skills/implement/` | Coding skill — follows your project's actual patterns |
-| `skills/review/` | Review skill — checks code against your real standards |
-| `agents/explorer.md` | Read-only codebase navigation agent |
-| `agents/planner.md` | Planning agent for complex feature design |
-| `agents/implementer.md` | Implementation agent scoped to your conventions |
-| `agents/reviewer.md` | Code review agent (read-only, uses your checklist) |
-| `agents/reviewers/` | Specialized reviewer sub-agents (optional, for larger projects) |
-| `test-prompts.md` | Realistic prompts for evaluating generated skills |
+When a new developer joins and asks "how does auth work here?", the generated
+ask skill points them to the exact files. When someone implements a feature,
+the implement skill follows your actual patterns — your error types, your
+repository abstractions, your test conventions. When code gets reviewed, the
+review skill checks against standards your team actually enforces, including
+the ones that only exist in PR comments.
+
+There's more to it than generating files. Potion runs a five-phase pipeline
+with human checkpoints at every stage. It discovers your modules, explores
+each one in depth, mines your PR review history for tribal knowledge, synthesizes
+everything into a guidelines document, then generates skills and agents from
+that foundation. You validate and correct at each step — because you know
+your codebase better than any agent.
 
 ## Installation
 
-### Via Claude Code plugin marketplace (recommended)
+### Claude Code marketplace
 
 ```bash
-# Add the marketplace
 /plugin marketplace add aureliensibiril/potion
 
-# Install the plugin
 /plugin install potion-skill-generator@aureliensibiril-potion
 ```
 
-### Manual installation
-
-Clone into your project's `.claude/plugins/` directory:
+### Manual (project-local)
 
 ```bash
-git clone https://github.com/aureliensibiril/potion.git <project-root>/.claude/plugins/potion-skill-generator
+git clone https://github.com/aureliensibiril/potion.git .claude/plugins/potion-skill-generator
 ```
 
-Or for global installation across all projects:
+### Manual (global)
 
 ```bash
 git clone https://github.com/aureliensibiril/potion.git ~/.claude/plugins/potion-skill-generator
@@ -48,108 +45,112 @@ git clone https://github.com/aureliensibiril/potion.git ~/.claude/plugins/potion
 
 ## Usage
 
+After installing, just tell Claude what you want:
+
 ```
 Generate a skill pack for this codebase
 ```
 
-Or more specifically:
+Or be more specific:
 
 ```
-Analyze this project and create development skills and agents
-for my team. I want Q&A, implementation, and review workflows.
+Analyze this project and create development skills and agents for my team
 ```
 
-**Refresh mode:** If a skill pack already exists, ask the generator to refresh
-it. It will re-scan the codebase, diff against existing guidelines, and update
-only what changed — no need to start from scratch.
+If a skill pack already exists and your codebase has changed, ask for a refresh:
+
+```
+Refresh the skill pack — we've added a new module
+```
+
+The generator will diff against the existing output and update only what changed.
 
 ## How it works
 
-```
-Phase 1: module-mapper agent
-  Scans codebase → module-map.json
-  User validates module boundaries
-            │
-Phase 2: module-explorer + doc-scanner agents (parallel)
-  One per module → per-module profiles + documentation profile
-  User reviews pattern findings
-            │
-Phase 3: pattern-synthesizer agent
-  Cross-references profiles → guidelines.md
-  User reviews the guidelines document
-            │
-Phase 4: skill-writer agent
-  Generates skills + agents from guidelines
-            │
-Phase 5 (optional): evaluation
-  Test generated skills with realistic prompts
-  Iterate on failures, validate before delivery
-            │
-Delivery:
-  Install to .claude/ or package as plugin
-```
+The pipeline runs in five phases. Each saves to a workspace so you can review,
+correct, and resume at any point.
 
-Each phase saves to a workspace — you can review, correct, and resume
-at any point.
+**Phase 1 — Discover.** The module-mapper agent scans your codebase structure
+and produces a module map. You validate the boundaries before moving on.
 
-## Plugin structure
+**Phase 2 — Explore.** One module-explorer agent per module, all running in
+parallel, each producing a detailed profile of patterns, conventions, and
+pitfalls. Simultaneously, a doc-scanner finds existing documentation (CLAUDE.md,
+Cursor rules, ADRs, config files) and a pr-review-miner extracts tribal
+knowledge from your merged PR comments — filtering out bot noise to surface
+what your team actually enforces during review.
 
-```
-potion-skill-generator/
-├── .claude-plugin/
-│   └── plugin.json                         # Plugin manifest
-├── skills/
-│   └── potion-skill-generator/
-│       ├── SKILL.md                        # Orchestrator
-│       ├── references/
-│       │   ├── phases.md                   # Detailed phase instructions
-│       │   └── output-schemas.md           # JSON contracts for agents
-│       ├── scripts/
-│       │   ├── validate_output.py          # Inter-phase validation
-│       │   └── tree_structure.py           # Filtered directory tree generator
-│       └── assets/
-│           └── templates/                  # Templates for generated outputs
-│               ├── ask-skill.md
-│               ├── plan-skill.md
-│               ├── implement-skill.md
-│               ├── review-skill.md
-│               ├── explorer-agent.md
-│               ├── planner-agent.md
-│               ├── implementer-agent.md
-│               ├── reviewer-agent.md
-│               ├── readme-plugin.md
-│               ├── test-prompts.md
-│               └── reviewers/              # Specialized reviewer sub-agent templates
-├── agents/
-│   ├── module-mapper.md                    # Phase 1: discovers modules
-│   ├── module-explorer.md                  # Phase 2: profiles each module
-│   ├── doc-scanner.md                      # Phase 2: discovers documentation
-│   ├── pattern-synthesizer.md              # Phase 3: synthesizes guidelines
-│   └── skill-writer.md                     # Phase 4: generates skill pack
-└── README.md
-```
+**Phase 3 — Synthesize.** The pattern-synthesizer cross-references all
+profiles, documentation, and review patterns into a unified guidelines
+document. Code patterns get reconciled with documented standards and
+review-enforced conventions.
 
-## Design decisions
+**Phase 4 — Generate.** The skill-writer produces the final skill pack
+from templates grounded in your guidelines. Skills, agents, review checklists,
+test prompts — all referencing your real files and patterns.
 
-**Progressive disclosure.** SKILL.md is the lean orchestrator and routes to
-`references/` for detailed phase instructions and schemas. Agents only
-load what they need.
+**Phase 5 — Evaluate (optional).** Test generated skills with realistic
+prompts. Compare responses with and without the skill loaded. Iterate on
+failures before delivery.
 
-**Guidelines as single source of truth.** Every generated skill references
-one `guidelines.md` rather than duplicating knowledge. Update the guidelines,
-all skills benefit.
+## What gets generated
 
-**Human-in-the-loop gates.** Each phase boundary is a validation checkpoint.
-The user knows their codebase better than any agent — their corrections are
-the most valuable input.
+| Output | What it does |
+|--------|-------------|
+| **guidelines.md** | The codebase DNA — architecture, patterns, conventions, pitfalls |
+| **ask skill** | Answers questions about the codebase with real file references |
+| **plan skill** | Designs implementation approaches following your architecture |
+| **implement skill** | Writes code following your actual patterns and conventions |
+| **review skill** | Reviews code against your real standards, not generic rules |
+| **explorer agent** | Read-only codebase navigation |
+| **planner agent** | Plans complex features respecting your architecture |
+| **implementer agent** | Implements features scoped to your conventions |
+| **reviewer agent** | Reviews code with your checklist (plus specialized sub-agents for larger projects) |
+| **test-prompts.md** | Realistic prompts for evaluating the generated skills |
 
-**Parallel exploration.** Phase 2 spawns one agent per module simultaneously.
-For large codebases, batches of 3-5 to avoid overload.
+## What's inside
 
-**Evaluation before delivery.** Inspired by the skill-creator pattern: test
-generated skills with realistic prompts before packaging.
+The plugin itself is a pipeline of specialized agents:
+
+- **module-mapper** — Phase 1. Scans codebase structure, identifies modules and boundaries.
+- **module-explorer** — Phase 2. Deep-dives into each module to extract patterns, conventions, and canonical examples.
+- **doc-scanner** — Phase 2. Discovers existing documentation, AI instructions, ADRs, config-enforced rules.
+- **pr-review-miner** — Phase 2. Mines merged PR review comments for enforced conventions and tribal knowledge. Filters out bot comments (CodeRabbit, Copilot, SonarQube, etc.) to focus on what humans actually say during review.
+- **pattern-synthesizer** — Phase 3. Reconciles code patterns, documented standards, and review culture into a unified guidelines document.
+- **skill-writer** — Phase 4. Generates the skill pack from templates grounded in the guidelines.
+
+Templates for all generated outputs live in `assets/templates/`. JSON contracts
+for agent I/O live in `references/output-schemas.md`. Phase instructions live
+in `references/phases.md`. The orchestrator (`SKILL.md`) routes to these on
+demand — agents only load what they need.
+
+## Philosophy
+
+- **Your patterns, not generic ones.** Every generated skill references real
+  files in your codebase. "Uses Result<T, AppError>" beats "handles errors."
+
+- **Human-in-the-loop.** Each phase boundary is a validation checkpoint. The
+  generator presents findings and waits — your corrections are the most
+  valuable input in the pipeline.
+
+- **Guidelines as single source of truth.** All generated skills reference one
+  guidelines document instead of duplicating knowledge. Update the guidelines,
+  all skills benefit.
+
+- **Tribal knowledge belongs in skills.** PR review comments, undocumented
+  conventions, patterns enforced through review but never written down — these
+  are captured and codified so the next developer doesn't have to learn them
+  the hard way.
+
+- **Evaluation before delivery.** Skills are tested with realistic prompts
+  before packaging. With-and-without comparison shows the actual improvement.
 
 ## Requirements
 
-- Claude Code with subagent support
-- A codebase to analyze (any language/framework)
+- Claude Code with plugin and subagent support
+- A codebase to analyze (any language, any framework)
+- For PR review mining: `gh` CLI (GitHub) or `glab` CLI (GitLab), authenticated
+
+## License
+
+MIT
