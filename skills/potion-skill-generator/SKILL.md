@@ -116,12 +116,18 @@ explore the module itself.
    → If success: platform = `"gitlab"`
 3. Else: PR review mining unavailable, will skip the agent.
 
-Spawn **all module-explorer agents, the doc-scanner agent, AND the pr-review-miner
-agent (if platform detected)** in parallel. The doc-scanner discovers existing
-documentation and saves to `{workspace}/phase2-docs.json`. The pr-review-miner
-extracts patterns from merged PR review comments and saves to
-`{workspace}/phase2-reviews.json`. Read `references/phases.md § Phase 2` for
-batching rules and how to present findings.
+Spawn **all module-explorer agents and the doc-scanner agent** in parallel.
+If platform was detected, also spawn the **pr-review-miner agent in the
+background** (`run_in_background: true`) — it makes many API calls and needs
+extra time. The doc-scanner discovers existing documentation and saves to
+`{workspace}/phase2-docs.json`. The pr-review-miner extracts patterns from
+merged PR review comments and saves to `{workspace}/phase2-reviews.json`.
+Read `references/phases.md § Phase 2` for batching rules and how to present
+findings.
+
+**Do not wait for the pr-review-miner** before proceeding to the user gate.
+If it completes before Phase 3, include its findings. If it times out, note
+it as a minor gap and proceed — the pipeline works fine without review data.
 
 Update `state.json`: set `phases.2.status` to `"in_progress"` at start. Track each
 unit in `phases.2.module_statuses` using `{parent}/{submodule}` keys for submodules,

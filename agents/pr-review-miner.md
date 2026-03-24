@@ -10,7 +10,7 @@ description: >
   not meant for direct use.
 tools: Read, Write, Bash, Glob, Grep
 model: sonnet
-effort: medium
+effort: high
 maxTurns: 100
 ---
 
@@ -66,9 +66,9 @@ If no platform is detected (no CLI available, no remote), save a minimal output:
 
 ### Step 2: Fetch merged PRs
 
-**GitHub:**
+**GitHub** — use a single call to get PRs with their review comments count:
 ```bash
-gh pr list --state merged --limit 200 \
+gh pr list --state merged --limit 100 \
   --json number,title,mergedAt,additions,deletions,comments,author,reviewDecision
 ```
 
@@ -96,19 +96,28 @@ From the fetched PRs:
    `comments` count as a first approximation, then verify with full comment
    fetching in Step 4.
 
-5. **Rank by comment count** and take the top 40 PRs.
+5. **Rank by comment count** and take the top **15** PRs. (Keep this small to
+   avoid timeout — 15 PRs with good comments is plenty for pattern extraction.)
 
 ### Step 4: Fetch and filter review comments
 
-For each selected PR, fetch all review comments with author metadata.
+For each selected PR, fetch review comments. **Batch efficiently** to avoid
+timeout — combine multiple API calls where possible.
 
-**GitHub:**
+**GitHub — use a single batch call per PR:**
 ```bash
-# Inline review comments (attached to code lines)
-gh api repos/{owner}/{repo}/pulls/{number}/comments --paginate
+# Fetch both inline comments and review bodies in one go per PR
+gh api repos/{owner}/{repo}/pulls/{number}/comments --paginate 2>/dev/null
+gh api repos/{owner}/{repo}/pulls/{number}/reviews --paginate 2>/dev/null
+```
 
-# Top-level review bodies (approve/request changes with text)
-gh api repos/{owner}/{repo}/pulls/{number}/reviews --paginate
+**Optimization:** Run comment fetches for multiple PRs in a single Bash call
+using a loop. This avoids the overhead of separate tool calls per PR:
+```bash
+for pr in 123 456 789; do
+  echo "---PR:$pr---"
+  gh api repos/{owner}/{repo}/pulls/$pr/comments 2>/dev/null
+done
 ```
 
 **GitLab:**
