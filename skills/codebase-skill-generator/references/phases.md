@@ -53,7 +53,9 @@ components, their boundaries, entry points, and relationships.
 
 4. **User gate — present the module map:**
 
-   Show a readable summary (not raw JSON):
+   Show a readable summary (not raw JSON) with a table and dependency list,
+   then use `AskUserQuestion` for structured feedback:
+
    ```
    I found {N} modules in your codebase:
 
@@ -63,11 +65,25 @@ components, their boundaries, entry points, and relationships.
    | ...    | ...  | ...     | ...  |
 
    Dependencies: auth → core, billing → core, billing → auth
-
-   Does this look right? Anything I missed or should split/merge?
    ```
 
-   Wait for user input. Apply corrections to the module map.
+   Then call:
+   ```
+   AskUserQuestion({
+     questions: [{
+       question: "Does this module breakdown look right?",
+       header: "Modules",
+       multiSelect: false,
+       options: [
+         { label: "Looks good", description: "Proceed to Phase 2 — explore each module in depth" },
+         { label: "Needs changes", description: "I'll describe what to split, merge, or rename" },
+         { label: "Re-scan", description: "Run Phase 1 again with different parameters" }
+       ]
+     }]
+   })
+   ```
+
+   Apply corrections if the user selects "Needs changes".
 
 ### Error handling
 
@@ -148,6 +164,7 @@ all existing documentation in the codebase.
 
 6. **User gate — present findings summary:**
 
+   Show the summary first:
    ```
    Exploration complete. Here's what I found across {N} modules:
 
@@ -163,8 +180,22 @@ all existing documentation in the codebase.
    **Notable findings:**
    - No test coverage in the billing module
    - The core module is imported by every other module
+   ```
 
-   Anything to correct before I synthesize the guidelines?
+   Then call:
+   ```
+   AskUserQuestion({
+     questions: [{
+       question: "Anything to correct in the exploration findings?",
+       header: "Patterns",
+       multiSelect: false,
+       options: [
+         { label: "Looks good", description: "Proceed to synthesize guidelines from these findings" },
+         { label: "Needs corrections", description: "I'll point out what's wrong or missing" },
+         { label: "Re-explore modules", description: "Re-run specific module explorations" }
+       ]
+     }]
+   })
    ```
 
 ### Per-module status tracking
@@ -253,19 +284,24 @@ codebase's architecture, conventions, patterns, and anti-patterns.
 5. **User gate — present guidelines for review:**
 
    The guidelines are the foundation for Phase 4. Getting them right matters
-   more than speed.
+   more than speed. Show the full guidelines.md content (or link to the file),
+   highlighting key sections to review: Core Patterns, Canonical Examples,
+   Known Pitfalls, Open Questions.
 
+   Then call:
    ```
-   Here's the guidelines document I generated. This will be the
-   shared knowledge base for all the skills I create.
-
-   [Show the full guidelines.md content, or link to the file]
-
-   Please review especially:
-   - Are the "Core Patterns" accurate?
-   - Are the "Canonical Examples" good choices?
-   - Anything in "Known Pitfalls" that's wrong or missing?
-   - Any "Open Questions" you can answer?
+   AskUserQuestion({
+     questions: [{
+       question: "How do the guidelines look?",
+       header: "Guidelines",
+       multiSelect: false,
+       options: [
+         { label: "Looks good", description: "Proceed to generate the skill pack" },
+         { label: "Needs edits", description: "I'll point out what to change" },
+         { label: "Regenerate", description: "Re-run synthesis with different focus" }
+       ]
+     }]
+   })
    ```
 
    Apply corrections. If the user answers open questions, fold those
@@ -357,22 +393,28 @@ install or distribute.
 
 5. **User gate:**
 
+   List each generated file with a 1-sentence description, then call:
    ```
-   Here's the complete skill pack:
-
-   [List each file with a 1-sentence description]
-
-   How would you like to proceed?
-   a) Package as a distributable plugin (/potion:ask, :plan, :implement, :review) — default
-   b) Install directly to .claude/
-   c) Run evaluation tests first
-   d) Review individual files before deciding
+   AskUserQuestion({
+     questions: [{
+       question: "How would you like to proceed with the skill pack?",
+       header: "Delivery",
+       multiSelect: false,
+       options: [
+         { label: "Run evaluation (Recommended)", description: "Test skills with realistic prompts before installing" },
+         { label: "Install as plugin", description: "Package and install directly without testing" },
+         { label: "Install to .claude/", description: "Copy skills/agents/guidelines directly to .claude/" },
+         { label: "Review files first", description: "Show me each generated file before deciding" }
+       ]
+     }]
+   })
    ```
 
    Store the user's choice in `state.json.user_choices.delivery_mode`:
-   - Option a → `"plugin"` (default)
-   - Option b → `"install"`
-   - Option c/d → keep current mode, proceed to evaluation or review
+   - "Run evaluation" → keep current mode, proceed to Phase 5
+   - "Install as plugin" → `"plugin"`
+   - "Install to .claude/" → `"install"`
+   - "Review files first" → keep current mode, show files then re-ask
 
 ### Evaluation step (recommended)
 
@@ -483,7 +525,20 @@ and description trigger testing.
 
 ### Procedure
 
-1. **Ask the user:** "Want to run evaluation tests before delivery? (recommended)"
+1. **Ask the user:**
+   ```
+   AskUserQuestion({
+     questions: [{
+       question: "Want to run evaluation tests before delivery?",
+       header: "Evaluate",
+       multiSelect: false,
+       options: [
+         { label: "Run tests (Recommended)", description: "Verify skills produce correct, useful responses" },
+         { label: "Skip evaluation", description: "Proceed directly to delivery" }
+       ]
+     }]
+   })
+   ```
    If the user skips, mark Phase 5 as `skipped` in state.json and proceed to delivery.
 
 2. **Create the evaluation workspace:**
@@ -580,7 +635,22 @@ and description trigger testing.
 
    {details on partials and iterations}
 
-   Ready to deliver?
+   ```
+
+   Then call:
+   ```
+   AskUserQuestion({
+     questions: [{
+       question: "Evaluation complete. Ready to deliver?",
+       header: "Deliver",
+       multiSelect: false,
+       options: [
+         { label: "Install", description: "Install the skill pack to the project" },
+         { label: "Iterate", description: "Fix issues and re-run failed evaluations" },
+         { label: "Review first", description: "Show me the evaluation details before installing" }
+       ]
+     }]
+   })
    ```
 
    Compute the benchmark section by aggregating timing data from all
@@ -687,13 +757,19 @@ and the user wants to update the skill pack without starting from scratch.
    - Run with/without comparison only for changed skills
 
 7. **User gate:**
+
+   Show the refresh summary, then call:
    ```
-   Refresh complete. Summary:
-
-   - Modules re-explored: {N} of {total}
-   - Guidelines sections updated: {list}
-   - Skills regenerated: {list}
-   - User-edited sections preserved: {list}
-
-   Ready to install the updated pack?
+   AskUserQuestion({
+     questions: [{
+       question: "Ready to install the updated skill pack?",
+       header: "Refresh",
+       multiSelect: false,
+       options: [
+         { label: "Install", description: "Replace the existing skill pack with the updated version" },
+         { label: "Review diffs", description: "Show me what changed before installing" },
+         { label: "Discard", description: "Keep the current skill pack unchanged" }
+       ]
+     }]
+   })
    ```

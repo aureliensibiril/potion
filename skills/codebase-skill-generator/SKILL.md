@@ -3,6 +3,7 @@ name: codebase-skill-generator
 description: "Analyzes any codebase and generates a complete, tailored skill pack — coding skills, review agents, Q&A agents, and a shared guidelines document, all grounded in the actual architecture and patterns of the target project. Use when the user asks to generate skills, create agents, make a skill pack, analyze a repo, package codebase knowledge, or create dev workflows. Also triggers on: refresh skills, update the skill pack, re-analyze this codebase."
 effort: high
 argument-hint: "[project-root-path]"
+allowed-tools: Read, Write, Edit, Glob, Grep, Bash, Agent, AskUserQuestion
 ---
 
 # Codebase Skill Generator
@@ -286,11 +287,89 @@ review.
 
 ### Gate prompts
 
-**Phase 1 → 2 gate:** "Does this module breakdown look right?"
-**Phase 2 → 3 gate:** "Here are the patterns I found. Anything to correct?"
-**Phase 3 → 4 gate:** "Here's the guidelines document. Review before I generate skills."
-**Phase 4 → 5 gate:** "Here's the skill pack. Want to run evaluation tests?"
-**Phase 5 → delivery:** "Evaluation complete. Here are the results — ready to install?"
+Use `AskUserQuestion` at every gate to present structured choices. Always show
+the relevant summary (table, list, etc.) BEFORE calling `AskUserQuestion`.
+
+**Phase 1 → 2 gate:**
+```
+AskUserQuestion({
+  questions: [{
+    question: "Does this module breakdown look right?",
+    header: "Modules",
+    multiSelect: false,
+    options: [
+      { label: "Looks good", description: "Proceed to Phase 2 — explore each module in depth" },
+      { label: "Needs changes", description: "I'll describe what to split, merge, or rename" },
+      { label: "Re-scan", description: "Run Phase 1 again with different parameters" }
+    ]
+  }]
+})
+```
+
+**Phase 2 → 3 gate:**
+```
+AskUserQuestion({
+  questions: [{
+    question: "Anything to correct in the exploration findings?",
+    header: "Patterns",
+    multiSelect: false,
+    options: [
+      { label: "Looks good", description: "Proceed to synthesize guidelines from these findings" },
+      { label: "Needs corrections", description: "I'll point out what's wrong or missing" },
+      { label: "Re-explore modules", description: "Re-run specific module explorations" }
+    ]
+  }]
+})
+```
+
+**Phase 3 → 4 gate:**
+```
+AskUserQuestion({
+  questions: [{
+    question: "How do the guidelines look?",
+    header: "Guidelines",
+    multiSelect: false,
+    options: [
+      { label: "Looks good", description: "Proceed to generate the skill pack" },
+      { label: "Needs edits", description: "I'll point out what to change" },
+      { label: "Regenerate", description: "Re-run synthesis with different focus" }
+    ]
+  }]
+})
+```
+
+**Phase 4 → 5 gate:**
+```
+AskUserQuestion({
+  questions: [{
+    question: "How would you like to proceed with the skill pack?",
+    header: "Delivery",
+    multiSelect: false,
+    options: [
+      { label: "Run evaluation (Recommended)", description: "Test skills with realistic prompts before installing" },
+      { label: "Install as plugin", description: "Package and install directly without testing" },
+      { label: "Install to .claude/", description: "Copy skills/agents/guidelines directly to .claude/" },
+      { label: "Review files first", description: "Show me each generated file before deciding" }
+    ]
+  }]
+})
+```
+
+**Phase 5 → delivery:**
+```
+AskUserQuestion({
+  questions: [{
+    question: "Evaluation complete. Ready to deliver?",
+    header: "Deliver",
+    multiSelect: false,
+    options: [
+      { label: "Install", description: "Install the skill pack to the project" },
+      { label: "Iterate", description: "Fix issues and re-run failed evaluations" },
+      { label: "Review first", description: "Show me the evaluation details before installing" }
+    ]
+  }]
+})
+```
 
 If the user says "just do it" or wants to skip validation, that's fine — proceed
 without gates. Adapt to their pace.
