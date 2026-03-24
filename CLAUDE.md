@@ -1,0 +1,71 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## Project Overview
+
+**Codebase Skill Generator** is a Claude Code plugin that analyzes any codebase and generates a tailored skill pack (coding skills, review agents, Q&A agents, and a shared guidelines document) grounded in the target project's actual architecture and patterns.
+
+## Architecture
+
+The plugin follows a **5-phase pipeline** orchestrated by `skills/codebase-skill-generator/SKILL.md`:
+
+1. **Phase 1 — Discover:** `agents/module-mapper.md` scans the codebase and produces `module-map.json`
+2. **Phase 2 — Explore:** `agents/module-explorer.md` (one per module, run in parallel) produces per-module JSON profiles
+3. **Phase 3 — Synthesize:** `agents/pattern-synthesizer.md` distills profiles into a unified `guidelines.md`
+4. **Phase 4 — Generate:** `agents/skill-writer.md` produces the final skill pack from templates + guidelines
+5. **Phase 5 — Evaluate (optional):** Structured evaluation with assertions, with/without-skill comparison, description trigger testing, and iteration
+
+Each phase has a **human-in-the-loop gate** where the user validates findings before proceeding. Phases save to `.claude/skill-gen-workspace/` for resumability.
+
+### Key design decisions
+
+- **Progressive disclosure:** SKILL.md is the lean orchestrator; detailed instructions live in `references/phases.md` and `references/output-schemas.md`
+- **Guidelines as single source of truth:** All generated skills reference one `guidelines.md` instead of duplicating knowledge
+- **Parallel exploration:** Phase 2 spawns all module-explorer agents simultaneously (batches of 3-5 for large codebases)
+- **Least-privilege agents:** Reviewer/explorer agents get read-only tools (Read, Glob, Grep). Write-capable agents: module-mapper (Bash for tree_structure.py), pattern-synthesizer (Write for guidelines output), skill-writer (Write/Edit for generating the skill pack)
+
+## File Layout
+
+```
+.claude-plugin/plugin.json              # Plugin manifest
+agents/                                 # Subagent definitions (YAML frontmatter + markdown)
+  module-mapper.md                      # Phase 1 agent
+  module-explorer.md                    # Phase 2 agent (spawned per module)
+  doc-scanner.md                        # Phase 2 agent (documentation discovery)
+  pattern-synthesizer.md                # Phase 3 agent
+  skill-writer.md                       # Phase 4 agent
+skills/codebase-skill-generator/
+  SKILL.md                              # Main orchestrator skill
+  references/phases.md                  # Detailed phase-by-phase instructions
+  references/output-schemas.md          # JSON contracts for all agent I/O
+  scripts/validate_output.py            # Inter-phase output validation
+  scripts/tree_structure.py             # Filtered directory tree generator
+  assets/templates/                     # Handlebars-style templates for generated outputs
+    ask-skill.md, implement-skill.md, review-skill.md, plan-skill.md
+    explorer-agent.md, implementer-agent.md, reviewer-agent.md, planner-agent.md
+    readme-plugin.md, test-prompts.md
+    reviewers/                          # Specialized reviewer sub-agent templates
+```
+
+## Validation
+
+Run inter-phase validation with:
+```bash
+python skills/codebase-skill-generator/scripts/validate_output.py --phase {1|2|3|4|5|all} --workspace <path>
+```
+
+Add `--project-root <path>` to verify file paths referenced in outputs exist on disk.
+Add `--verbose` for detailed output. When `--phase all`, cross-phase validation runs automatically.
+
+## Conventions
+
+- **Agent definitions** use YAML frontmatter (`name`, `description`, `tools`, `model`, `effort`, `maxTurns`) followed by markdown instructions
+- **Skill definitions** use the same frontmatter format in `SKILL.md` files
+- **Output contracts** are JSON schemas defined in `references/output-schemas.md` — agents must return valid JSON matching these schemas
+- **Templates** in `assets/templates/` use `{{placeholder}}` and `{{#each}}` Handlebars-style syntax
+- Agent tool restrictions must match their role: reviewers/explorers are read-only, implementers get write access
+- Skill descriptions should be "pushy" — include multiple trigger phrasings so Claude reliably activates them
+- Skill and agent descriptions must be in **third person** ("Analyzes..." not "Analyze...")
+- Skills use `allowed-tools` in frontmatter; agents use `tools`
+- Generated guidelines include `<!-- user-edited -->` markers for sections preserved during refresh
