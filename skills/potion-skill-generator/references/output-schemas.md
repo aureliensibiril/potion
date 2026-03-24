@@ -98,6 +98,75 @@ Produced by the `doc-scanner` agent, running in parallel with module explorers.
 
 ---
 
+## § Review Patterns Profile (Phase 2)
+
+Produced by the `pr-review-miner` agent, running in parallel with module explorers
+and the doc-scanner. This profile is **optional** — it is only produced when a
+GitHub or GitLab CLI is available and the repository has merged PRs with review comments.
+
+```json
+{
+  "mined_at": "string — ISO 8601",
+  "platform": "github | gitlab | unavailable",
+  "repository": "string — owner/repo",
+  "prs_analyzed": "number",
+  "comments_total": "number — all comments fetched (including bots)",
+  "comments_human": "number — after filtering out bots",
+  "comments_bot_filtered": "number — bot comments excluded",
+  "time_window": {
+    "from": "string — ISO 8601",
+    "to": "string — ISO 8601"
+  },
+  "review_patterns": [
+    {
+      "category": "naming-convention | architecture-rule | error-handling | testing-expectation | security-concern | performance-preference | code-style | api-design | anti-pattern",
+      "pattern": "string — concise description of the enforced convention",
+      "frequency": "number — occurrences across distinct PRs",
+      "confidence": "high | medium | low",
+      "evidence": [
+        {
+          "pr_number": "number",
+          "excerpt": "string — max 200 chars, no @-mentions or personal identifiers",
+          "file_context": "string | null — file path the comment was on, if available"
+        }
+      ],
+      "related_modules": ["string — module names from Phase 1 map, if module-specific"],
+      "contradicts_docs": "boolean — true if this pattern contradicts documented standards"
+    }
+  ],
+  "reviewer_focus_areas": {
+    "most_commented_paths": ["string — top 5 file paths/directories with most human review comments"],
+    "most_debated_topics": ["string — top 3 recurring discussion themes"],
+    "approval_blockers": ["string — patterns that consistently block PR approval"]
+  },
+  "reviewer_count": "number — count of distinct human reviewers in the sample",
+  "coverage_gaps": ["string — areas with no review patterns found"],
+  "limitations": ["string — e.g. 'gh CLI not authenticated', 'Only last 6 months available'"]
+}
+```
+
+**Confidence levels:**
+- `high` — 5+ occurrences across 3+ distinct PRs
+- `medium` — 2-4 occurrences
+- `low` — single occurrence with strong rule language ("always", "never", "must")
+
+**Privacy rules:**
+- `evidence[].excerpt` must not contain @-mentions, full names, or email addresses
+- Replace @-mentions with "reviewer" or "author" in excerpts
+- Cap excerpts at 200 characters
+- Do not store reviewer usernames — only the count (`reviewer_count`)
+
+**Bot filtering:** The agent MUST filter out bot comments (AI review tools, CI bots,
+dependency updaters) using `author.type`, username patterns, and content heuristics.
+Only human comments count toward pattern frequency and PR ranking.
+
+**Rules:** `review_patterns` may be empty if the repo has no human review activity.
+All `related_modules` entries must reference module names from Phase 1.
+All `evidence[].file_context` paths must be relative to project root.
+Saved to `{workspace}/phase2-reviews.json`.
+
+---
+
 ## § Module Profile (Phase 2)
 
 ```json
@@ -132,6 +201,15 @@ Produced by the `doc-scanner` agent, running in parallel with module explorers.
     "typing": {
       "strictness": "strict | moderate | loose | untyped",
       "type_location": "string", "shared_types": ["string"]
+    },
+    "observability": {
+      "logging_framework": "string — e.g. 'Python logging', 'Winston', 'slog', 'loguru', 'none'",
+      "logging_style": "structured | unstructured | mixed",
+      "log_levels_used": ["string — e.g. 'DEBUG', 'INFO', 'WARNING', 'ERROR'"],
+      "metrics_framework": "string | null — e.g. 'Prometheus', 'StatsD', 'OpenTelemetry', 'none'",
+      "tracing": "string | null — e.g. 'OpenTelemetry', 'Jaeger', 'Datadog', 'none'",
+      "conventions": ["string — e.g. 'structured JSON logs', 'correlation IDs in all requests', 'no PII in logs'"],
+      "example_file": "string"
     }
   },
   "conventions": {
@@ -190,7 +268,7 @@ only that file gets useful, actionable context.
 phase3-guidelines/
 ├── index.md              # Overview, module map, canonical examples, links to topics
 ├── architecture.md       # Architecture patterns, module boundaries, data flow
-├── patterns.md           # Error handling, data access, DI, types, code examples
+├── patterns.md           # Error handling, data access, DI, types, observability, code examples
 ├── conventions.md        # Naming, code style, git workflow, documented standards
 ├── testing.md            # Frameworks, organization, naming, utilities, test examples
 ├── pitfalls.md           # Known pitfalls, aggregated and prioritized
@@ -451,7 +529,9 @@ is installed in a different location.
       "output_file": "string | null",
       "error": "string | null",
       "module_statuses": {
-        "<module_name>": "pending | in_progress | completed | failed"
+        "<module_name>": "pending | in_progress | completed | failed",
+        "doc_scanner": "pending | in_progress | completed | failed",
+        "pr_review_miner": "pending | in_progress | completed | skipped | failed"
       }
     },
     "3": { "...same fields..." },

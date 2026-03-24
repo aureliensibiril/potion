@@ -45,6 +45,29 @@ For each dimension below, find 2-3 representative files and read them:
 - **Testing:** Framework, organization, naming, utilities/fixtures
 - **Dependency injection:** How dependencies are wired, config loaded
 - **Types:** Strictness, location, shared types (if typed language)
+- **Observability:** Logging framework, structured vs unstructured, log levels,
+  metrics/instrumentation, tracing, conventions (see below)
+
+#### Observability deep-dive
+
+Search for logging, metrics, and tracing usage:
+
+```
+Grep: import.*log|getLogger|logger\.|console\.(log|warn|error)|slog\.|zap\.|tracing::
+Grep: metrics|counter|histogram|gauge|instrument|telemetry|otel
+Grep: trace_id|correlation.id|request.id|span
+```
+
+Determine:
+- **Logging framework**: Python: `logging`, `loguru`, `structlog`; Node: `winston`,
+  `pino`, `bunyan`; Go: `slog`, `zap`, `zerolog`; Rust: `tracing`, `log`; Java: `slf4j`, `log4j`
+- **Logging style**: Structured (JSON key-value) or unstructured (printf-style)?
+- **Log levels**: Which levels are actually used? Is there consistency?
+- **Metrics**: Any metrics collection? Prometheus, StatsD, OpenTelemetry, custom
+- **Tracing**: Distributed tracing? OpenTelemetry, Jaeger, Datadog, X-Ray
+- **Conventions**: correlation IDs, request context propagation, PII avoidance
+
+If the module has no logging at all, report `"logging_framework": "none"`.
 
 ### Step 4: Conventions and idioms
 
@@ -103,6 +126,15 @@ Return ONLY a JSON object. No markdown. No explanation.
       "strictness": "strict | moderate | loose | untyped",
       "type_location": "string",
       "shared_types": ["string"]
+    },
+    "observability": {
+      "logging_framework": "string",
+      "logging_style": "structured | unstructured | mixed",
+      "log_levels_used": ["string"],
+      "metrics_framework": "string | null",
+      "tracing": "string | null",
+      "conventions": ["string"],
+      "example_file": "string"
     }
   },
   "conventions": {

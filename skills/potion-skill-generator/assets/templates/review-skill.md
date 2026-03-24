@@ -69,6 +69,21 @@ Each sub-agent returns findings in JSON format. After all complete:
 ### Naming & style
 {{naming_checklist}}
 
+### Observability
+{{#if observability_patterns}}
+- [ ] Uses the project's logging framework ({{logging_framework}})
+- [ ] Log levels are appropriate (not logging debug info at ERROR)
+- [ ] Structured logging format followed (if applicable)
+- [ ] No PII or secrets in log messages
+- [ ] Correlation/request IDs propagated where applicable
+{{#if metrics_framework}}
+- [ ] New endpoints/operations have appropriate metrics
+{{/if}}
+{{else}}
+- [ ] Logging is consistent with existing patterns in the module
+- [ ] No sensitive data in log output
+{{/if}}
+
 ## Module-specific notes
 
 {{module_specific_notes}}
