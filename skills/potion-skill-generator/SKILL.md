@@ -84,7 +84,7 @@ only when you need to check a schema. Do not read the full files upfront.
      "user_choices": {
        "selected_outputs": [],
        "skip_evaluation": false,
-       "delivery_mode": "plugin",
+       "delivery_mode": "install",
        "guidelines_mode": null
      }
    }
@@ -382,8 +382,8 @@ AskUserQuestion({
     multiSelect: false,
     options: [
       { label: "Run evaluation (Recommended)", description: "Test skills with realistic prompts before installing" },
-      { label: "Install as plugin", description: "Package and install directly without testing" },
-      { label: "Install to .claude/", description: "Copy skills/agents/guidelines directly to .claude/" },
+      { label: "Install to .claude/ (Recommended)", description: "Install skills/agents/guidelines directly — auto-discovered, short names like /ask" },
+      { label: "Package as plugin", description: "Distributable plugin with namespaced skills like /potion:ask — for sharing with team" },
       { label: "Review files first", description: "Show me each generated file before deciding" }
     ]
   }]
