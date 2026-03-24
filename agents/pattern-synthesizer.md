@@ -12,7 +12,7 @@ description: >
 tools: Read, Write, Glob, Grep
 model: sonnet
 effort: high
-maxTurns: 60
+maxTurns: 120
 ---
 
 # Pattern Synthesizer

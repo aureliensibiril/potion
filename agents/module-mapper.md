@@ -11,7 +11,7 @@ description: >
 tools: Read, Write, Glob, Grep
 model: sonnet
 effort: medium
-maxTurns: 60
+maxTurns: 120
 memory: project
 ---
 

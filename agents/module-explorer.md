@@ -12,7 +12,7 @@ description: >
 tools: Read, Write, Glob, Grep
 model: sonnet
 effort: medium
-maxTurns: 50
+maxTurns: 100
 ---
 
 # Module Explorer
