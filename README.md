@@ -1,5 +1,11 @@
 # 🧪 Potion
 
+> *"We are in a small village of indomitable Gauls who still hold out against
+> the invaders. And life is not easy for the legionaries who garrison the
+> fortified camps..."*
+>
+> Their secret? A magic potion that gives them superhuman strength.
+
 **Build your own superpowers.**
 
 Potion is a Claude Code plugin that reads your codebase — its architecture,
