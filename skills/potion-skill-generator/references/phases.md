@@ -101,7 +101,8 @@ components, their boundaries, entry points, and relationships.
 
 For each module (and submodule), produce a detailed profile covering its
 purpose, patterns, dependencies, and conventions. Simultaneously discover
-all existing documentation in the codebase.
+all existing documentation in the codebase and mine PR review comments
+for tribal knowledge.
 
 ### Procedure
 
@@ -143,12 +144,28 @@ all existing documentation in the codebase.
    Save to {workspace}/phase2-docs.json
    ```
 
-   Launch ALL agents (explorers + doc-scanner) in the same turn.
+   **If PR review mining is available** (platform detected in pre-check),
+   also spawn the pr-review-miner:
+
+   ```
+   Use the pr-review-miner agent to analyze merged PR review comments
+   for {project_root}.
+
+   Platform: {github|gitlab}
+   Repository: {owner/repo from detection step}
+   Module map: {workspace}/phase1-module-map.json (for correlating comments to modules)
+
+   Return a review patterns profile as JSON following the schema in
+   references/output-schemas.md § Review Patterns Profile.
+   Save to {workspace}/phase2-reviews.json
+   ```
+
+   Launch ALL agents (explorers + doc-scanner + pr-review-miner) in the same turn.
 
 3. **Batching for large codebases:** Count each exploration unit individually
    (a module with 3 submodules = 3 units). If more than 8 units, batch
-   explorers in groups of 3-5. The doc-scanner always runs with the first
-   batch.
+   explorers in groups of 3-5. The doc-scanner and pr-review-miner always
+   run with the first batch.
 
 4. **As explorers complete**, collect profiles and watch for:
    - Conflicting pattern descriptions (sign of codebase inconsistency)
@@ -180,6 +197,11 @@ all existing documentation in the codebase.
    **Notable findings:**
    - No test coverage in the billing module
    - The core module is imported by every other module
+
+   **From PR reviews ({N} PRs analyzed, {M} human comments):** (if available)
+   - Top enforced conventions: early returns preferred, error types required
+   - Common mistakes caught in review: missing input validation, N+1 queries
+   - Review-only knowledge: "always add migration tests for schema changes"
    ```
 
    Then call:
@@ -210,12 +232,15 @@ Track each exploration unit's status in `state.json` at
   "backend/billing": "completed",
   "backend/card-market": "in_progress",
   "backend/sync-engine": "pending",
-  "doc_scanner": "completed"
+  "doc_scanner": "completed",
+  "pr_review_miner": "completed"
 }
 ```
 
 On retry, only re-run failed units — reuse completed profiles as-is.
 The doc-scanner is tracked as `"doc_scanner"` in `module_statuses`.
+The pr-review-miner is tracked as `"pr_review_miner"` — set to `"skipped"`
+if no platform was detected during the pre-check.
 
 ### Error handling
 
@@ -224,6 +249,10 @@ The doc-scanner is tracked as `"doc_scanner"` in `module_statuses`.
   more detail there").
 - Explorer can't determine patterns: the module may be too small or too
   generic. Note "insufficient data" and move on — the user can fill gaps.
+- PR review miner: `gh`/`glab` CLI not installed → warn with install
+  instructions, skip agent. Not authenticated → warn with auth instructions
+  (`gh auth login` / `glab auth login`), skip agent. No merged PRs or no
+  review comments → agent completes with empty patterns, notes in `coverage_gaps`.
 
 ---
 
@@ -240,6 +269,7 @@ codebase's architecture, conventions, patterns, and anti-patterns.
    - Module map from Phase 1
    - All module profiles from Phase 2 (including submodule profiles)
    - Documentation profile from Phase 2 (`phase2-docs.json`, if it exists)
+   - Review patterns profile from Phase 2 (`phase2-reviews.json`, if it exists)
    - User corrections from both gates
 
 2. **Delegate to pattern-synthesizer agent:**
@@ -250,11 +280,17 @@ codebase's architecture, conventions, patterns, and anti-patterns.
    Module map: {workspace}/phase1-module-map.json
    Module profiles: {workspace}/phase2-profiles/
    Documentation profile: {workspace}/phase2-docs.json (if available)
+   Review patterns profile: {workspace}/phase2-reviews.json (if available)
 
    The documentation profile contains existing coding standards, AI
    instructions (Cursor rules, CLAUDE.md), architecture decisions, and
    config-enforced rules. Use it to reconcile discovered patterns with
    documented intent. See Step 2.5 in the synthesizer instructions.
+
+   The review patterns profile contains conventions enforced during PR
+   review, common mistakes caught by reviewers, and tribal knowledge.
+   Use it to reconcile code patterns with team review culture.
+   See Step 2.7 in the synthesizer instructions.
 
    Guidelines mode: {guidelines_mode from state.json}
 

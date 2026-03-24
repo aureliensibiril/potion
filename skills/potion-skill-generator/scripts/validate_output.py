@@ -257,6 +257,55 @@ def validate_phase2(ws, project_root=None):
                     if not (Path(project_root) / doc_path).exists():
                         r.warn(f"Doc path does not exist: {doc_path}")
 
+    # Validate PR review patterns profile (optional, from pr-review-miner)
+    reviews_path = ws / "phase2-reviews.json"
+    if reviews_path.exists():
+        reviews = load_json(reviews_path)
+        if not reviews:
+            r.warn("phase2-reviews.json exists but is invalid JSON")
+        else:
+            platform = reviews.get("platform", "unknown")
+            prs_analyzed = reviews.get("prs_analyzed", 0)
+            comments_human = reviews.get("comments_human", 0)
+            comments_bot = reviews.get("comments_bot_filtered", 0)
+            pattern_count = len(reviews.get("review_patterns", []))
+            r.ok(f"Review patterns profile: {pattern_count} patterns from {prs_analyzed} PRs "
+                 f"({comments_human} human comments, {comments_bot} bot filtered) [{platform}]")
+
+            if platform == "unavailable":
+                r.ok("PR review mining was skipped (no platform detected)")
+            else:
+                if prs_analyzed == 0:
+                    r.warn("PR review miner found no PRs to analyze")
+
+                valid_categories = {
+                    "naming-convention", "architecture-rule", "error-handling",
+                    "testing-expectation", "security-concern", "performance-preference",
+                    "code-style", "api-design", "anti-pattern"
+                }
+                for pat in reviews.get("review_patterns", []):
+                    cat = pat.get("category", "")
+                    if cat not in valid_categories:
+                        r.warn(f"Unknown review pattern category: {cat}")
+                    # Privacy check: no @-mentions in evidence excerpts
+                    for ev in pat.get("evidence", []):
+                        excerpt = ev.get("excerpt", "")
+                        if re.search(r"@(?!ts-|type|param|returns|override|deprecated)", excerpt):
+                            r.warn(f"Evidence excerpt may contain @-mention: {excerpt[:60]}...")
+                        if len(excerpt) > 200:
+                            r.warn(f"Evidence excerpt exceeds 200 chars ({len(excerpt)})")
+
+                    # Validate related_modules against Phase 1 module map
+                    if module_map:
+                        module_names = set()
+                        for m in module_map.get("modules", []):
+                            module_names.add(m.get("name", ""))
+                            for s in m.get("submodules", []):
+                                module_names.add(s.get("name", ""))
+                        for mod in pat.get("related_modules", []):
+                            if mod not in module_names:
+                                r.warn(f"Review pattern references unknown module: {mod}")
+
     return r
 
 
@@ -797,6 +846,28 @@ def validate_cross_phase(ws, verbose=False, delivery_mode="install"):
             r.error(f"Evaluation failures: {names}")
         else:
             r.ok(f"All {len(all_tested)} evaluated items passed")
+
+    # 7. Review patterns from Phase 2 reflected in guidelines (if available)
+    reviews = load_json(ws / "phase2-reviews.json")
+    if reviews and reviews.get("platform") != "unavailable":
+        high_conf = [p for p in reviews.get("review_patterns", [])
+                     if p.get("confidence") == "high"]
+        if high_conf and guidelines:
+            found = sum(1 for p in high_conf
+                        if p.get("pattern", "").lower().split()[0] in guidelines.lower())
+            if found == 0:
+                r.warn(f"{len(high_conf)} high-confidence review patterns not reflected in guidelines")
+            else:
+                r.ok(f"Review patterns: {found}/{len(high_conf)} high-confidence patterns found in guidelines")
+
+        anti_patterns = [p for p in reviews.get("review_patterns", [])
+                         if p.get("category") == "anti-pattern"]
+        if anti_patterns and guidelines:
+            pitfalls_lower = guidelines.lower()
+            if "pitfall" in pitfalls_lower:
+                r.ok(f"{len(anti_patterns)} anti-patterns from reviews (verify they appear in pitfalls)")
+            else:
+                r.warn("Anti-patterns found in reviews but guidelines has no pitfalls section")
 
     return r
 

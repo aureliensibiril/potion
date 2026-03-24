@@ -102,22 +102,33 @@ Update `state.json`: set `phases.1.status` to `"in_progress"` and `phases.1.star
 at start. Set `"completed"` and `phases.1.completed_at` on success, or `"failed"` with
 `phases.1.error` on failure. Always update `updated_at`.
 
-### Phase 2: Module Exploration + Documentation Discovery
+### Phase 2: Module Exploration + Documentation Discovery + PR Review Mining
 
 Build the exploration list from Phase 1: for modules with `submodules`, explore
 each submodule independently (not the parent). For modules without submodules,
 explore the module itself.
 
-Spawn **all module-explorer agents AND the doc-scanner agent** in parallel.
-The doc-scanner discovers existing documentation (Cursor rules, CLAUDE.md, ADRs,
-config files) and saves to `{workspace}/phase2-docs.json`. Read
-`references/phases.md § Phase 2` for batching rules and how to present findings.
+**Before spawning agents**, detect if PR review mining is possible:
+
+1. Run: `gh repo view --json nameWithOwner 2>/dev/null`
+   → If success: platform = `"github"`
+2. Else run: `glab repo view 2>/dev/null`
+   → If success: platform = `"gitlab"`
+3. Else: PR review mining unavailable, will skip the agent.
+
+Spawn **all module-explorer agents, the doc-scanner agent, AND the pr-review-miner
+agent (if platform detected)** in parallel. The doc-scanner discovers existing
+documentation and saves to `{workspace}/phase2-docs.json`. The pr-review-miner
+extracts patterns from merged PR review comments and saves to
+`{workspace}/phase2-reviews.json`. Read `references/phases.md § Phase 2` for
+batching rules and how to present findings.
 
 Update `state.json`: set `phases.2.status` to `"in_progress"` at start. Track each
-unit in `phases.2.module_statuses` using `{parent}/{submodule}` keys for submodules
-and `"doc_scanner"` for the doc-scanner. Set phase status to `"completed"` when all
-units succeed, or `"failed"` with error if any fail — but keep successful profiles
-so they can be reused on retry. Always update `updated_at`.
+unit in `phases.2.module_statuses` using `{parent}/{submodule}` keys for submodules,
+`"doc_scanner"` for the doc-scanner, and `"pr_review_miner"` for the PR review miner
+(set to `"skipped"` if no platform was detected). Set phase status to `"completed"`
+when all units succeed, or `"failed"` with error if any fail — but keep successful
+profiles so they can be reused on retry. Always update `updated_at`.
 
 ### Phase 3: Pattern Synthesis
 
@@ -125,8 +136,10 @@ First, select the guidelines mode. Count the total exploration units (modules
 without submodules + individual submodules). If >= 8 units, use `"multi"` mode;
 otherwise `"single"`. Store in `state.json.user_choices.guidelines_mode`.
 
-Delegate to the **pattern-synthesizer** agent with all module profiles AND
-the documentation profile (`phase2-docs.json`) from the doc-scanner.
+Delegate to the **pattern-synthesizer** agent with all module profiles,
+the documentation profile (`phase2-docs.json`) from the doc-scanner, AND
+the review patterns profile (`phase2-reviews.json`) from the pr-review-miner
+(if it exists).
 
 - **Single mode:** produces `phase3-guidelines.md`
 - **Multi mode:** produces `phase3-guidelines/` directory with topic files
@@ -237,6 +250,7 @@ Display all generated files for review. Do not install or copy anything.
 │   ├── backend-card-market.json
 │   └── ...
 ├── phase2-docs.json                        # documentation profile from doc-scanner
+├── phase2-reviews.json                     # review patterns profile from pr-review-miner (optional)
 ├── phase3-guidelines.md                    # single-file mode
 ├── phase3-guidelines/                      # multi-file mode (alternative)
 │   ├── index.md

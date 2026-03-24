@@ -58,6 +58,37 @@ read it and cross-reference with the patterns found in code:
 Add a `### Documented Standards` subsection under Conventions in the
 guidelines for rules that come from existing documentation.
 
+### Step 2.7: Reconcile with review patterns
+
+If the orchestrator provides a review patterns profile (`phase2-reviews.json`),
+read it and cross-reference with the patterns found in code and documentation:
+
+- **High-confidence patterns** (frequency 5+): treat as first-class conventions.
+  These are rules the team actively enforces during review. Add them to the
+  relevant section of the guidelines (Conventions, Error Handling, Testing, etc.).
+  Tag with "(enforced in code review)" so downstream skills know the source.
+
+- **Medium-confidence patterns**: cross-reference with code patterns from module
+  profiles. If the code confirms the review pattern, elevate to convention.
+  If the code contradicts it, flag as "aspirational" — the team wants this
+  but hasn't fully adopted it yet.
+
+- **Anti-patterns from reviews**: add to Known Pitfalls with the evidence.
+  These are mistakes real developers made that real reviewers caught — the
+  most valuable pitfall source.
+
+- **Review-only conventions**: patterns found in reviews but NOT in code or docs.
+  These are the "tribal knowledge" — document them prominently since they
+  exist nowhere else.
+
+- **Contradictions**: where review patterns contradict documented standards
+  (the `contradicts_docs` flag), flag explicitly. The user needs to decide
+  which is authoritative.
+
+Add a `### Review-Enforced Standards` subsection under Conventions in the
+guidelines for rules that come from PR review patterns. This sits alongside
+the existing `### Documented Standards` subsection.
+
 ### Step 3: Extract the "why"
 
 Start with ADRs and architecture decisions from the documentation profile
@@ -95,11 +126,13 @@ user edits when re-generating guidelines.
 ### Testing (with example test)
 ### Type System
 ### Dependency Management
+### Observability (logging, metrics, tracing — with example)
 
 ## Conventions
 ### Naming
 ### Code Style
 ### Git & Workflow
+### Review-Enforced Standards (if review data available)
 
 ## Module-Specific Notes
 {Sections for modules with unique patterns}
@@ -133,8 +166,8 @@ files instead of one. Write each file to the directory path specified.
 |------|----------------------------------|
 | `index.md` | Architecture Overview + Canonical Examples + Team Notes + Open Questions |
 | `architecture.md` | Architecture Overview (expanded) + Module-Specific Notes |
-| `patterns.md` | Core Patterns: Code Organization, Error Handling, Data Access, DI, Types |
-| `conventions.md` | Conventions: Naming, Code Style, Git & Workflow + Documented Standards |
+| `patterns.md` | Core Patterns: Code Organization, Error Handling, Data Access, DI, Types, Observability |
+| `conventions.md` | Conventions: Naming, Code Style, Git & Workflow + Documented Standards + Review-Enforced Standards |
 | `testing.md` | Core Patterns: Testing (expanded into its own file) |
 | `pitfalls.md` | Known Pitfalls |
 | `module-notes/{name}.md` | Module-Specific Notes (one file per module with unique patterns) |
@@ -165,6 +198,9 @@ Before returning, verify:
 - [ ] Canonical examples from diverse modules (not all from one)
 - [ ] Pitfalls are actionable, not vague
 - [ ] Useful to both humans AND AI agents
+- [ ] (If review data) Review patterns reconciled with code/doc patterns
+- [ ] (If review data) Anti-patterns from reviews in Known Pitfalls
+- [ ] (If review data) Review-Enforced Standards subsection present
 - [ ] (Multi-file) Each file is self-contained
 - [ ] (Multi-file) `index.md` has links to all topic files
 
