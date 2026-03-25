@@ -166,7 +166,17 @@ for tribal knowledge.
    Save to {workspace}/phase2-reviews.json
    ```
 
-   Launch ALL agents (explorers + doc-scanner + pr-review-miner) in the same turn.
+   Also spawn the **git-workflow-scanner** alongside the doc-scanner:
+
+   ```
+   Use the git-workflow-scanner agent to analyze git history and workflow
+   conventions for {project_root}.
+
+   Save to {workspace}/phase2-git-workflow.json
+   ```
+
+   Launch ALL agents (explorers + doc-scanner + git-workflow-scanner +
+   pr-review-miner) in the same turn.
 
 3. **Batching for large codebases:** Count each exploration unit individually
    (a module with 3 submodules = 3 units). If more than 8 units, batch
@@ -239,6 +249,7 @@ Track each exploration unit's status in `state.json` at
   "backend/card-market": "in_progress",
   "backend/sync-engine": "pending",
   "doc_scanner": "completed",
+  "git_workflow_scanner": "completed",
   "pr_review_miner": "completed"
 }
 ```
@@ -286,12 +297,17 @@ codebase's architecture, conventions, patterns, and anti-patterns.
    Module map: {workspace}/phase1-module-map.json
    Module profiles: {workspace}/phase2-profiles/
    Documentation profile: {workspace}/phase2-docs.json (if available)
+   Git workflow profile: {workspace}/phase2-git-workflow.json (if available)
    Review patterns profile: {workspace}/phase2-reviews.json (if available)
 
    The documentation profile contains existing coding standards, AI
    instructions (Cursor rules, CLAUDE.md), architecture decisions, and
    config-enforced rules. Use it to reconcile discovered patterns with
    documented intent. See Step 2.5 in the synthesizer instructions.
+
+   The git workflow profile contains commit format, branching strategy,
+   merge method, and PR process. Use it to populate the Git & Workflow
+   section. See Step 2.6 in the synthesizer instructions.
 
    The review patterns profile contains conventions enforced during PR
    review, common mistakes caught by reviewers, and tribal knowledge.

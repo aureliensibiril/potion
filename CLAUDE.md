@@ -33,6 +33,7 @@ agents/                                 # Subagent definitions (YAML frontmatter
   module-mapper.md                      # Phase 1 agent
   module-explorer.md                    # Phase 2 agent (spawned per module)
   doc-scanner.md                        # Phase 2 agent (documentation discovery)
+  git-workflow-scanner.md               # Phase 2 agent (git history, branching, merge, PR analysis)
   pr-review-miner.md                    # Phase 2 agent (PR review comment mining, optional)
   pattern-synthesizer.md                # Phase 3 agent
   skill-writer.md                       # Phase 4 agent

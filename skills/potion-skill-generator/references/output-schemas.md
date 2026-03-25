@@ -100,6 +100,58 @@ Produced by the `doc-scanner` agent, running in parallel with module explorers.
 
 ---
 
+## § Git Workflow Profile (Phase 2)
+
+Produced by the `git-workflow-scanner` agent, running in parallel with module
+explorers and the doc-scanner. Analyzes git history, branch structure, merge
+patterns, and PR conventions.
+
+```json
+{
+  "scanned_at": "string — ISO 8601",
+  "commit_format": {
+    "style": "conventional | scope-prefix | ticket-ref | free-form | mixed",
+    "details": "string",
+    "consistency": "high | medium | low",
+    "examples": ["string — 5 representative commits"],
+    "has_descriptions": "boolean",
+    "description_pattern": "string | null"
+  },
+  "branching": {
+    "strategy": "trunk-based | gitflow | feature-branches | other",
+    "default_branch": "string",
+    "branch_naming": "string",
+    "branch_examples": ["string"],
+    "long_lived_branches": ["string"]
+  },
+  "merge_strategy": {
+    "method": "squash-merge | merge-commit | rebase | mixed",
+    "evidence": "string"
+  },
+  "pr_process": {
+    "platform": "github | gitlab | none",
+    "template_exists": "boolean",
+    "template_sections": ["string"],
+    "required_reviewers": "number | null",
+    "review_before_merge": "boolean | null",
+    "ci_checks_on_pr": ["string"],
+    "auto_merge_enabled": "boolean | null"
+  },
+  "releases": {
+    "has_tags": "boolean",
+    "tag_format": "string | null",
+    "frequency": "string | null",
+    "has_changelog": "boolean"
+  },
+  "limitations": ["string"]
+}
+```
+
+**Rules:** All data must come from actual git history, not assumptions.
+Saved to `{workspace}/phase2-git-workflow.json`.
+
+---
+
 ## § Review Patterns Profile (Phase 2)
 
 Produced by the `pr-review-miner` agent, running in parallel with module explorers

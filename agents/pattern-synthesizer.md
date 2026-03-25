@@ -58,6 +58,24 @@ read it and cross-reference with the patterns found in code:
 Add a `### Documented Standards` subsection under Conventions in the
 guidelines for rules that come from existing documentation.
 
+### Step 2.6: Reconcile with git workflow
+
+If the orchestrator provides a git workflow profile (`phase2-git-workflow.json`),
+read it and use it to populate the `### Git & Workflow` section of the guidelines:
+
+- **Commit format**: document the exact format with examples. If conventional
+  commits, list the allowed types. If ticket refs, show the pattern.
+- **Branching**: document the strategy, naming convention, and default branch.
+  Include examples of actual branch names from the profile.
+- **Merge strategy**: document whether PRs should be squash-merged, rebased,
+  or regular merged. This is critical — getting this wrong creates messy history.
+- **PR process**: document the template structure (if any), required reviewers,
+  CI checks. This tells developers what to expect before merging.
+- **Release process**: if tags/changelog exist, document the release workflow.
+
+These are not optional conventions — they are the team's actual workflow. Write
+them as rules ("Always squash-merge to main") not suggestions.
+
 ### Step 2.7: Reconcile with review patterns
 
 If the orchestrator provides a review patterns profile (`phase2-reviews.json`),
@@ -131,7 +149,12 @@ user edits when re-generating guidelines.
 ## Conventions
 ### Naming
 ### Code Style
-### Git & Workflow
+### Git & Workflow (from doc-scanner's git_workflow)
+  - Commit format (conventional commits? ticket refs? scope prefix? examples)
+  - Branching strategy (trunk-based? gitflow? branch naming convention)
+  - Merge strategy (squash? rebase? merge commit?)
+  - PR process (template? required reviewers? CI checks?)
+  - Default/base branch
 ### Review-Enforced Standards (if review data available)
 
 ## Module-Specific Notes

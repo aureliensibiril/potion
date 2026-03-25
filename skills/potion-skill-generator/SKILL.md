@@ -116,23 +116,24 @@ explore the module itself.
    → If success: platform = `"gitlab"`
 3. Else: PR review mining unavailable, will skip the agent.
 
-Spawn **all module-explorer agents and the doc-scanner agent** in parallel.
-If platform was detected, also spawn the **pr-review-miner agent in the
-background** (`run_in_background: true`) — it makes many API calls and needs
-extra time. The doc-scanner discovers existing documentation and saves to
-`{workspace}/phase2-docs.json`. The pr-review-miner extracts patterns from
-merged PR review comments and saves to `{workspace}/phase2-reviews.json`.
+Spawn **all module-explorer agents, the doc-scanner, and the git-workflow-scanner**
+in parallel. If platform was detected, also spawn the **pr-review-miner agent**.
+
+- Doc-scanner: saves to `{workspace}/phase2-docs.json`
+- Git-workflow-scanner: saves to `{workspace}/phase2-git-workflow.json`
+- PR-review-miner: saves to `{workspace}/phase2-reviews.json`
+
 Read `references/phases.md § Phase 2` for batching rules and how to present
 findings.
 
-**Wait for the pr-review-miner** to complete before proceeding to the user
-gate. If it times out, re-run it before moving on — PR review data is a
-critical input for the guidelines.
+**Wait for all agents** to complete before proceeding to the user gate. If any
+agent times out, re-run it before moving on.
 
 Update `state.json`: set `phases.2.status` to `"in_progress"` at start. Track each
 unit in `phases.2.module_statuses` using `{parent}/{submodule}` keys for submodules,
-`"doc_scanner"` for the doc-scanner, and `"pr_review_miner"` for the PR review miner
-(set to `"skipped"` if no platform was detected). Set phase status to `"completed"`
+`"doc_scanner"` for the doc-scanner, `"git_workflow_scanner"` for the git workflow
+scanner, and `"pr_review_miner"` for the PR review miner (set to `"skipped"` if no
+platform was detected). Set phase status to `"completed"`
 when all units succeed, or `"failed"` with error if any fail — but keep successful
 profiles so they can be reused on retry. Always update `updated_at`.
 
@@ -143,8 +144,9 @@ without submodules + individual submodules). If >= 8 units, use `"multi"` mode;
 otherwise `"single"`. Store in `state.json.user_choices.guidelines_mode`.
 
 Delegate to the **pattern-synthesizer** agent with all module profiles,
-the documentation profile (`phase2-docs.json`) from the doc-scanner, AND
-the review patterns profile (`phase2-reviews.json`) from the pr-review-miner
+the documentation profile (`phase2-docs.json`) from the doc-scanner,
+the git workflow profile (`phase2-git-workflow.json`) from the git-workflow-scanner,
+AND the review patterns profile (`phase2-reviews.json`) from the pr-review-miner
 (if it exists).
 
 - **Single mode:** produces `phase3-guidelines.md`
@@ -255,6 +257,7 @@ Display all generated files for review. Do not install or copy anything.
 │   ├── backend-card-market.json
 │   └── ...
 ├── phase2-docs.json                        # documentation profile from doc-scanner
+├── phase2-git-workflow.json                # git workflow profile from git-workflow-scanner
 ├── phase2-reviews.json                     # review patterns profile from pr-review-miner (optional)
 ├── phase3-guidelines.md                    # single-file mode
 ├── phase3-guidelines/                      # multi-file mode (alternative)

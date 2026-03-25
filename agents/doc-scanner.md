@@ -106,6 +106,12 @@ Glob: turbo.json
 Extract: what commands developers run, what CI checks enforce, what
 deployment process exists.
 
+### Tier 5 — Git workflow (delegated)
+
+Git workflow analysis (commit format, branching, merge strategy, PR process)
+is handled by the dedicated `git-workflow-scanner` agent. Do NOT duplicate
+this analysis — focus on documentation files only.
+
 ## What to look for beyond file discovery
 
 After finding files, use Grep to detect documentation patterns:
