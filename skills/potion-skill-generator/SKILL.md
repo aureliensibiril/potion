@@ -104,6 +104,47 @@ Update `state.json`: set `phases.1.status` to `"in_progress"` and `phases.1.star
 at start. Set `"completed"` and `phases.1.completed_at` on success, or `"failed"` with
 `phases.1.error` on failure. Always update `updated_at`.
 
+### Stack Detection (between Phase 1 and Phase 2)
+
+After the user validates the module map, determine `stack_mode`:
+
+1. **Group modules by language.** Read each module's `language` field from the
+   validated module map. Group modules into language clusters.
+
+2. **Apply threshold.** A language group qualifies as a "stack" if it has
+   ≥2 modules OR ≥20 source files across its modules. Groups below threshold
+   are tagged as "minor" and folded into shared conventions.
+
+3. **Determine mode:**
+   - 1 qualifying stack → `stack_mode: "single"` (current behavior)
+   - 2+ qualifying stacks → `stack_mode: "multi"`
+
+4. **Auto-generate stack names** from `{language}-{role}`:
+   - Look at module paths to infer role: paths containing `backend`, `server`,
+     `api`, `worker` → role is `backend`
+   - Paths containing `frontend`, `web`, `app`, `client`, `ui` → role is `frontend`
+   - Paths containing `infra`, `deploy`, `terraform` → role is `infra`
+   - If role is ambiguous, use just the language name
+   - Examples: `python-backend`, `typescript-frontend`, `go-infra`
+
+5. **Detect frameworks** per stack by checking dependency files:
+   - Python: read `pyproject.toml` or `requirements.txt` for FastAPI, Django, Flask, Dagster, etc.
+   - TypeScript: read `package.json` for Next.js, React, Vue, Angular, Express, etc.
+   - Go: read `go.mod` for framework imports
+   - Store in `stacks[].frameworks`
+
+6. **Update state.json** with `stack_mode` and `stacks` array.
+
+7. **Present to user** as part of the Phase 1 → 2 transition (after the module
+   map gate, before launching Phase 2 agents):
+   ```
+   Stack analysis:
+   - python-backend (FastAPI, Dagster): backend/webapp, backend/automation, backend/sidekiq
+   - typescript-frontend (Next.js, React): frontend/web, frontend/admin, frontend/auth
+
+   Stack mode: multi (2 stacks detected)
+   ```
+
 ### Phase 2: Module Exploration + Documentation Discovery + PR Review Mining
 
 Build the exploration list from Phase 1: for modules with `submodules`, explore

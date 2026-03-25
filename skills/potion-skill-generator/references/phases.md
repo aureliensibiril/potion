@@ -99,6 +99,93 @@ components, their boundaries, entry points, and relationships.
 - If the agent times out: the codebase is probably very large. Ask the
   user to identify the top 5-10 most important directories.
 
+### Stack Detection
+
+After the Phase 1 user gate, before Phase 2 begins, the orchestrator determines
+if the codebase uses multiple language stacks.
+
+**Procedure:**
+
+1. **Read the validated module map.** Extract the `language` field from each
+   module and submodule.
+
+2. **Group by language.** Create language clusters:
+   ```
+   python: [backend/webapp, backend/automation, backend/sidekiq]
+   typescript: [frontend/web, frontend/admin, frontend/auth]
+   ```
+
+3. **Apply qualification threshold.** A language group becomes a "stack" if:
+   - It contains ≥2 modules, OR
+   - Its modules contain ≥20 source files total
+
+   Groups below threshold are noted as "minor stacks" — their conventions
+   will be folded into `shared.md` rather than getting dedicated guidelines.
+
+4. **Determine stack_mode:**
+   - 0-1 qualifying stacks → `"single"` (current behavior, no changes downstream)
+   - 2+ qualifying stacks → `"multi"` (activates per-stack synthesis and skill generation)
+
+5. **Generate stack names.** For each qualifying stack, auto-generate a name
+   from `{language}-{role}`:
+
+   Infer role from module paths:
+   ```
+   Grep: backend|server|api|worker  → role = "backend"
+   Grep: frontend|web|app|client|ui → role = "frontend"
+   Grep: infra|deploy|terraform     → role = "infra"
+   Grep: mobile|ios|android         → role = "mobile"
+   ```
+
+   If multiple modules in the same language have different roles, use the
+   dominant role. If ambiguous, use just the language name (e.g., `python`).
+
+6. **Detect frameworks.** For each stack, scan dependency files:
+
+   Python:
+   ```
+   Glob: {module_paths}/**/pyproject.toml
+   Glob: {module_paths}/**/requirements*.txt
+   Glob: {module_paths}/**/setup.py
+   ```
+   Look for: FastAPI, Django, Flask, Dagster, Celery, SQLAlchemy, Pydantic
+
+   TypeScript/JavaScript:
+   ```
+   Glob: {module_paths}/**/package.json
+   ```
+   Look for: next, react, vue, angular, express, nestjs, svelte
+
+   Go:
+   ```
+   Glob: {module_paths}/**/go.mod
+   ```
+   Look for: gin, echo, fiber, chi
+
+   Store detected frameworks in `stacks[].frameworks`.
+
+7. **Update state.json:**
+   ```json
+   "stack_mode": "multi",
+   "stacks": [
+     {
+       "name": "python-backend",
+       "language": "python",
+       "frameworks": ["FastAPI", "Dagster"],
+       "modules": ["backend/webapp", "backend/automation", "backend/sidekiq"]
+     },
+     {
+       "name": "typescript-frontend",
+       "language": "typescript",
+       "frameworks": ["Next.js", "React"],
+       "modules": ["frontend/web", "frontend/admin", "frontend/auth"]
+     }
+   ]
+   ```
+
+8. **Present to user.** Show the stack analysis before proceeding to Phase 2.
+   The user can correct stack names or module assignments if needed.
+
 ---
 
 ## § Phase 2: Module Exploration
