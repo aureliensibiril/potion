@@ -350,7 +350,7 @@ Display all generated files for review. Do not install or copy anything.
 ├── phase2-git-workflow.json                # git workflow profile from git-workflow-scanner
 ├── phase2-reviews.json                     # review patterns profile from pr-review-miner (optional)
 ├── phase3-guidelines.md                    # single-file mode
-├── phase3-guidelines/                      # multi-file mode (alternative)
+├── phase3-guidelines/                      # multi-file mode (single-stack):
 │   ├── index.md
 │   ├── architecture.md
 │   ├── patterns.md
@@ -358,6 +358,12 @@ Display all generated files for review. Do not install or copy anything.
 │   ├── testing.md
 │   ├── pitfalls.md
 │   └── module-notes/
+│                                           # OR multi-stack mode:
+│   ├── shared.md                           # cross-cutting conventions
+│   ├── {stack-name}/                       # per-stack guidelines
+│   │   ├── index.md, patterns.md, conventions.md, testing.md, pitfalls.md
+│   │   └── module-notes/
+│   └── ...
 ├── phase4-output/                          # standalone mode layout (default):
 │   ├── guidelines.md (or guidelines/)
 │   ├── skills/{potion-ask,potion-plan,potion-implement,potion-review}/SKILL.md

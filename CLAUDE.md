@@ -37,6 +37,8 @@ agents/                                 # Subagent definitions (YAML frontmatter
   git-workflow-scanner.md               # Phase 2 agent (git history, branching, merge, PR analysis)
   pr-review-miner.md                    # Phase 2 agent (PR review comment mining, optional)
   pattern-synthesizer.md                # Phase 3 agent
+  shared-synthesizer.md                 # Phase 3 agent (cross-cutting conventions, multi-stack only)
+  stack-synthesizer.md                  # Phase 3 agent (per-stack synthesis, multi-stack only)
   skill-writer.md                       # Phase 4 agent
 skills/potion-skill-generator/
   SKILL.md                              # Main orchestrator skill
