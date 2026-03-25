@@ -24,6 +24,7 @@ Each phase has a **human-in-the-loop gate** where the user validates findings be
 - **Guidelines as single source of truth:** All generated skills reference one `guidelines.md` instead of duplicating knowledge
 - **Parallel exploration:** Phase 2 spawns all module-explorer agents simultaneously (batches of 3-5 for large codebases)
 - **Least-privilege agents:** Reviewer agents get read-only tools (Read, Glob, Grep). Explorer/doc-scanner agents get Read + Write (to save profiles). PR review miner gets Read + Write + Bash (for gh/glab CLI). Write-capable agents: module-mapper (Bash + Glob for structural scanning), pattern-synthesizer (Write for guidelines output), skill-writer (Write/Edit for generating the skill pack)
+- **Multi-stack awareness:** For monorepos with 2+ language stacks (e.g., Python backend + TypeScript frontend), the pipeline auto-detects stacks, generates per-stack guidelines, and creates stack-specific implementation agents coordinated by a master
 
 ## File Layout
 
