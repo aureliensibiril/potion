@@ -245,10 +245,11 @@ against both stacks' rules.
 - `agents/skill-writer.md` — Multi-stack template selection
 - `agents/module-mapper.md` — Ensure language_stack is per-module
 
-## Open Questions
+## Decisions
 
-1. Should stack names be auto-generated (`python-backend`) or user-confirmed
-   during the Phase 1 gate?
-2. For the review skill, should the master reviewer pass stack context to
-   each topic reviewer, or should each topic reviewer detect the stack from
-   the file path?
+1. Stack names are **auto-generated** from language + role (e.g., `python-backend`,
+   `typescript-frontend`). No user confirmation needed — they can rename during
+   the Phase 1 gate if they want.
+2. The master reviewer **passes stack context** to each topic reviewer. The reviewer
+   doesn't detect it from file paths — the master tells it which stack's guidelines
+   to load.
