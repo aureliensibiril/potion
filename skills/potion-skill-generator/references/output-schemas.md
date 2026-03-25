@@ -359,6 +359,43 @@ Each file must:
 **Rules:** saved to `{workspace}/phase3-guidelines/`. All file paths from profiles.
 At least 3 canonical examples in `index.md`. Every required file must exist.
 
+### Multi-stack mode
+
+When `stack_mode` is `"multi"`, guidelines are organized by stack with a
+shared cross-cutting file. This mode always uses multi-file layout within
+each stack.
+
+```
+phase3-guidelines/
+├── shared.md                    # Cross-cutting: git, CI/CD, deployment, contracts
+├── python-backend/
+│   ├── index.md
+│   ├── patterns.md
+│   ├── conventions.md
+│   ├── testing.md
+│   ├── pitfalls.md
+│   └── module-notes/
+└── typescript-frontend/
+    ├── index.md
+    ├── patterns.md
+    ├── conventions.md
+    ├── testing.md
+    ├── pitfalls.md
+    └── module-notes/
+```
+
+**Required files:** `shared.md` must exist. Each stack directory must contain
+`index.md`, `patterns.md`, `conventions.md`, `testing.md`, `pitfalls.md`.
+`module-notes/` is optional.
+
+**shared.md sections:** Project Overview, Git & Workflow, CI/CD Pipeline,
+Monorepo Tooling, Cross-Stack Contracts, Deployment, Observability,
+Review-Enforced Standards (cross-cutting only), Team Notes.
+
+**Per-stack files:** Same structure as single-stack multi-file mode, but
+scoped to one language stack. Must not duplicate content from `shared.md` —
+reference it instead.
+
 ### Mode selection
 
 The orchestrator selects the mode and stores it in `state.json.user_choices.guidelines_mode`:
@@ -366,6 +403,8 @@ The orchestrator selects the mode and stores it in `state.json.user_choices.guid
 - `"multi"` — `phase3-guidelines/` directory with topic files
 - Auto-select: use `"multi"` when >= 8 exploration units (modules + submodules) or
   the synthesizer estimates >= 400 lines; otherwise `"single"`
+- When `stack_mode` is `"multi"`, `guidelines_mode` is always `"multi"` and
+  the multi-stack layout is used instead of the single-stack multi-file layout.
 
 ---
 
