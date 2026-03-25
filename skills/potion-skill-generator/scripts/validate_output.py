@@ -332,8 +332,30 @@ def detect_guidelines_mode(ws):
     return None
 
 
+def detect_multi_stack(ws):
+    """Check if guidelines use multi-stack layout (shared.md + stack dirs)."""
+    guidelines_dir = ws / "phase3-guidelines"
+    if not guidelines_dir.is_dir():
+        return False, []
+    shared = guidelines_dir / "shared.md"
+    if not shared.exists():
+        return False, []
+    # Find stack directories (directories that contain index.md)
+    stacks = []
+    for d in sorted(guidelines_dir.iterdir()):
+        if d.is_dir() and (d / "index.md").exists():
+            stacks.append(d.name)
+    return len(stacks) >= 2, stacks
+
+
 def validate_phase3(ws, project_root=None):
     r = Result()
+
+    # Check for multi-stack first
+    is_multistack, stacks = detect_multi_stack(ws)
+    if is_multistack:
+        return validate_phase3_multistack(ws, stacks, project_root)
+
     mode = detect_guidelines_mode(ws)
 
     if mode == "multi":
@@ -410,6 +432,64 @@ def validate_phase3_multi(ws, project_root=None):
             if fn not in idx_content:
                 r.warn(f"index.md does not link to {fn}")
 
+    return r
+
+
+def validate_phase3_multistack(ws, stacks, project_root=None):
+    """Validate multi-stack guidelines (shared.md + per-stack directories)."""
+    r = Result()
+    d = ws / "phase3-guidelines"
+    r.ok(f"Guidelines (multi-stack mode): {len(stacks)} stacks")
+
+    # Validate shared.md
+    shared = d / "shared.md"
+    if shared.exists():
+        content = shared.read_text()
+        lines = len(content.splitlines())
+        r.ok(f"shared.md: {lines} lines")
+        for section in ["Git", "CI", "Deployment"]:
+            if section.lower() in content.lower():
+                r.ok(f"shared.md has '{section}' section")
+            else:
+                r.warn(f"shared.md missing '{section}' section")
+    else:
+        r.error("shared.md not found")
+
+    # Validate each stack directory
+    required_files = ["index.md", "patterns.md", "conventions.md", "testing.md", "pitfalls.md"]
+    total_lines = len(shared.read_text().splitlines()) if shared.exists() else 0
+
+    for stack_name in stacks:
+        stack_dir = d / stack_name
+        stack_lines = 0
+        for fname in required_files:
+            f = stack_dir / fname
+            if f.exists():
+                lines = len(f.read_text().splitlines())
+                stack_lines += lines
+                r.ok(f"{stack_name}/{fname}: {lines} lines")
+            else:
+                r.error(f"{stack_name}: missing required file {fname}")
+
+        # Check for module-notes (optional)
+        mn = stack_dir / "module-notes"
+        if mn.is_dir():
+            notes = list(mn.glob("*.md"))
+            if notes:
+                r.ok(f"{stack_name}/module-notes: {len(notes)} files")
+
+        # Check index.md has links to topic files
+        idx = stack_dir / "index.md"
+        if idx.exists():
+            idx_content = idx.read_text()
+            for fn in ["patterns.md", "conventions.md", "testing.md", "pitfalls.md"]:
+                if fn not in idx_content:
+                    r.warn(f"{stack_name}/index.md does not link to {fn}")
+
+        total_lines += stack_lines
+        r.ok(f"{stack_name}: {stack_lines} lines across {len(required_files)} files")
+
+    r.ok(f"Total guidelines: {total_lines} lines across all stacks + shared")
     return r
 
 
