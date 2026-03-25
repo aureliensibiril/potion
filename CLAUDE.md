@@ -50,6 +50,8 @@ skills/potion-skill-generator/
     ask-skill.md, implement-skill.md, review-skill.md, plan-skill.md
     explorer-agent.md, implementer-agent.md, reviewer-agent.md, planner-agent.md
     readme-plugin.md, test-prompts.md
+    master-implement-skill.md, master-plan-skill.md, master-review-skill.md
+    stack-implementer-agent.md
     reviewers/                          # Specialized reviewer sub-agent templates
 ```
 
