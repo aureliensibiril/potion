@@ -83,6 +83,27 @@ For each candidate module: does it have its own entry point or public API?
 Its own dependencies or config? Can you describe its purpose in one sentence?
 Two "yes" answers → it's a module.
 
+### Step 3.3: Detect language per module
+
+For each module, determine the primary language from file extensions:
+
+```
+Glob: {module_path}/**/*.py
+Glob: {module_path}/**/*.ts
+Glob: {module_path}/**/*.tsx
+Glob: {module_path}/**/*.js
+Glob: {module_path}/**/*.go
+Glob: {module_path}/**/*.rs
+Glob: {module_path}/**/*.java
+```
+
+Count files per extension. The language with the most source files wins.
+Report as: `python`, `typescript`, `javascript`, `go`, `rust`, `java`, or `other`.
+
+TypeScript and TSX count together as `typescript`. JavaScript and JSX count
+together as `javascript`. If a module has both `.ts` and `.js`, pick the
+dominant one.
+
 ### Step 3.5: WRITE THE INITIAL MAP NOW
 
 **Do not continue exploring before writing.** Take what you know from Steps 1-3
@@ -174,6 +195,7 @@ Return ONLY a JSON object matching this schema. No markdown. No explanation.
       "depended_by": ["string — module names"],
       "estimated_size": "small (<20 files) | medium (20-100) | large (100+)",
       "has_tests": true,
+      "language": "string — primary language: python | typescript | javascript | go | rust | java | other",
       "notes": "string — anything unusual, empty if nothing",
       "submodules": [
         {
@@ -184,6 +206,7 @@ Return ONLY a JSON object matching this schema. No markdown. No explanation.
           "boundary_type": "string — describe the pattern: hexagonal, feature-folders, vertical-slices, etc.",
           "estimated_size": "small | medium | large",
           "has_tests": true,
+          "language": "string — primary language: python | typescript | javascript | go | rust | java | other",
           "notes": "string",
           "submodules": ["...recursive — same schema, for nested boundaries (DDD aggregates, bounded contexts, etc.)"]
         }

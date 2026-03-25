@@ -24,6 +24,7 @@ The orchestrator checks outputs between phases.
       "depended_by": ["string — module names"],
       "estimated_size": "small | medium | large",
       "has_tests": "boolean",
+      "language": "string — primary language: python | typescript | javascript | go | rust | java | other",
       "notes": "string",
       "submodules": [
         {
@@ -34,6 +35,7 @@ The orchestrator checks outputs between phases.
           "boundary_type": "string — free-form: hexagonal, feature-folders, vertical-slices, layered-mvc, etc.",
           "estimated_size": "small | medium | large",
           "has_tests": "boolean",
+          "language": "string — primary language: python | typescript | javascript | go | rust | java | other",
           "notes": "string",
           "submodules": ["...recursive — same schema, for nested boundaries"]
         }
@@ -56,6 +58,7 @@ The orchestrator checks outputs between phases.
 Submodule names must be unique within their parent. Submodule paths must be under
 the parent module's path. Submodules can be nested recursively (up to 6-8 levels)
 for DDD bounded contexts, aggregates, and deep layered architectures.
+Each module MUST have a `language` field. Submodules inherit parent language if not specified.
 
 ---
 
