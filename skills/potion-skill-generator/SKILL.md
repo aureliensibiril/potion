@@ -194,6 +194,10 @@ profiles so they can be reused on retry. Always update `updated_at`.
 
 ### Phase 3: Pattern Synthesis
 
+Read `state.json.user_choices.stack_mode` to determine the synthesis path.
+
+#### If stack_mode is "single" (default)
+
 First, select the guidelines mode. Count the total exploration units (modules
 without submodules + individual submodules). If >= 8 units, use `"multi"` mode;
 otherwise `"single"`. Store in `state.json.user_choices.guidelines_mode`.
@@ -209,6 +213,37 @@ AND the review patterns profile (`phase2-reviews.json`) from the pr-review-miner
 
 Pass `guidelines_mode` to the synthesizer. Read `references/phases.md § Phase 3`
 for the synthesis process and quality checks.
+
+#### If stack_mode is "multi"
+
+Guidelines mode is always `"multi"` in multi-stack mode. Store
+`"multi"` in `state.json.user_choices.guidelines_mode`.
+
+**Step 1 — Shared synthesis (sequential):**
+
+Delegate to the **shared-synthesizer** agent with ALL module profiles,
+documentation profile, git workflow profile, and review patterns profile.
+Output: `{workspace}/phase3-guidelines/shared.md`
+
+Wait for completion. Present `shared.md` to the user for review.
+
+**Step 2 — Per-stack synthesis (parallel):**
+
+For each stack in `state.json.stacks`, delegate to a **stack-synthesizer**
+agent:
+- Pass only that stack's module profiles (filter by `stacks[].modules`)
+- Pass `{workspace}/phase3-guidelines/shared.md` for cross-referencing
+- Pass stack metadata (name, language, frameworks)
+- Output: `{workspace}/phase3-guidelines/{stack_name}/`
+
+Launch ALL stack synthesizers in parallel. Wait for all to complete.
+
+Present each stack's guidelines to the user for review.
+
+Read `references/phases.md § Phase 3` for detailed delegation prompts
+and quality checks.
+
+#### State update (both paths)
 
 Update `state.json`: set `phases.3.status` to `"in_progress"` at start, `"completed"`
 on success, or `"failed"` with error. Always update `updated_at`.

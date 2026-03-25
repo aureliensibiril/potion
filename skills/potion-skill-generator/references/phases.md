@@ -381,6 +381,11 @@ codebase's architecture, conventions, patterns, and anti-patterns.
 
 ### Procedure
 
+Read `state.json.user_choices.stack_mode` to choose the single-stack or
+multi-stack path below.
+
+#### Single-stack path (stack_mode is "single" or null)
+
 1. **Gather all inputs:**
    - Module map from Phase 1
    - All module profiles from Phase 2 (including submodule profiles)
@@ -463,6 +468,106 @@ codebase's architecture, conventions, patterns, and anti-patterns.
 
    Apply corrections. If the user answers open questions, fold those
    answers into the guidelines.
+
+#### Multi-stack path (stack_mode is "multi")
+
+Guidelines mode is always `"multi"` in multi-stack mode. Store `"multi"` in
+`state.json.user_choices.guidelines_mode`.
+
+1. **Gather all inputs** (same as single-stack path):
+   - Module map from Phase 1
+   - All module profiles from Phase 2 (including submodule profiles)
+   - Documentation profile from Phase 2 (`phase2-docs.json`, if it exists)
+   - Git workflow profile from Phase 2 (`phase2-git-workflow.json`, if it exists)
+   - Review patterns profile from Phase 2 (`phase2-reviews.json`, if it exists)
+   - User corrections from both gates
+
+2. **Step 1 — Shared synthesis (sequential).** Delegate to the
+   **shared-synthesizer** agent:
+
+   ```
+   Use the shared-synthesizer agent.
+
+   Module map: {workspace}/phase1-module-map.json
+   Module profiles: {workspace}/phase2-profiles/
+   Documentation profile: {workspace}/phase2-docs.json (if available)
+   Git workflow profile: {workspace}/phase2-git-workflow.json (if available)
+   Review patterns profile: {workspace}/phase2-reviews.json (if available)
+
+   Produce shared.md covering cross-cutting conventions only.
+   Save to {workspace}/phase3-guidelines/shared.md
+   ```
+
+   Wait for completion. Present `shared.md` to the user for review before
+   proceeding to per-stack synthesis:
+
+   ```
+   AskUserQuestion({
+     questions: [{
+       question: "How do the shared (cross-cutting) guidelines look?",
+       header: "Shared Guidelines",
+       multiSelect: false,
+       options: [
+         { label: "Looks good", description: "Proceed to per-stack synthesis" },
+         { label: "Needs edits", description: "I'll point out what to change" },
+         { label: "Regenerate", description: "Re-run shared synthesis with different focus" }
+       ]
+     }]
+   })
+   ```
+
+   Apply corrections if needed before continuing.
+
+3. **Step 2 — Per-stack synthesis (parallel).** For each stack in
+   `state.json.stacks`, delegate to a **stack-synthesizer** agent:
+
+   ```
+   Use the stack-synthesizer agent.
+
+   Stack: {stack_name}
+   Language: {language}
+   Frameworks: {frameworks}
+   Modules in this stack: {module_list}
+
+   Module profiles (this stack only): {list of profile paths for this stack's modules}
+   Shared guidelines: {workspace}/phase3-guidelines/shared.md
+
+   Produce stack-specific guidelines.
+   Save to {workspace}/phase3-guidelines/{stack_name}/
+   ```
+
+   Launch ALL stack synthesizers in parallel. Wait for all to complete.
+
+4. **Review the outputs yourself.** Before showing the user, verify the same
+   quality criteria as the single-stack path for each stack's guidelines.
+
+5. **Validate:**
+   ```bash
+   python ${CLAUDE_SKILL_DIR}/scripts/validate_output.py \
+     --phase 3 --workspace {workspace}
+   ```
+
+6. **User gate — present each stack's guidelines for review:**
+
+   Show each stack's guidelines with a summary of what it covers, then call:
+
+   ```
+   AskUserQuestion({
+     questions: [{
+       question: "How do the per-stack guidelines look?",
+       header: "Stack Guidelines",
+       multiSelect: false,
+       options: [
+         { label: "Looks good", description: "Proceed to generate the skill pack" },
+         { label: "Needs edits", description: "I'll point out what to change in specific stacks" },
+         { label: "Regenerate stack", description: "Re-run synthesis for a specific stack" }
+       ]
+     }]
+   })
+   ```
+
+   Apply corrections. If the user answers open questions, fold those
+   answers into the relevant stack guidelines.
 
 ### Quality standards (from skill-creator patterns)
 
