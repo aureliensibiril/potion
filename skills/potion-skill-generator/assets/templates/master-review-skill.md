@@ -4,7 +4,7 @@
   Reviews code for {{project_name}} across multiple language stacks. Determines
   which stacks are in the diff, passes stack context to topic reviewers, and
   aggregates findings. Use when someone asks to "review", "check", or "audit" code.
-allowed-tools: Read, Glob, Grep
+allowed-tools: Read, Glob, Grep, Agent
 model: opus
 effort: high
 ---

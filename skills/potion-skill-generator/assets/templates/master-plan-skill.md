@@ -5,7 +5,7 @@
   which stacks are involved, determines execution order based on data flow, and
   creates stack-labeled implementation sections. Use when someone asks to "plan",
   "design", "architect", or "think about" a feature.
-allowed-tools: Read, Glob, Grep
+allowed-tools: Read, Glob, Grep, Agent
 model: opus
 effort: high
 ---

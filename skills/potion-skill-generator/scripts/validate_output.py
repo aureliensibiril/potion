@@ -618,7 +618,7 @@ def validate_plugin(ws):
     return r
 
 
-def validate_phase4(ws, delivery_mode="install"):
+def validate_phase4(ws, delivery_mode="standalone"):
     if delivery_mode == "plugin":
         return validate_plugin(ws)
 
@@ -827,7 +827,7 @@ def validate_phase5(ws):
     return r
 
 
-def validate_cross_phase(ws, verbose=False, delivery_mode="install"):
+def validate_cross_phase(ws, verbose=False, delivery_mode="standalone"):
     """Cross-phase validation: verify consistency across all phase outputs."""
     r = Result()
 
@@ -1008,7 +1008,7 @@ def validate_state(ws):
         r.warn("state.json missing user_choices")
     else:
         dm = choices.get("delivery_mode")
-        if dm and dm not in ("install", "plugin", "review-only"):
+        if dm and dm not in ("standalone", "plugin", "review-only"):
             r.error(f"Invalid delivery_mode: {dm}")
         gm = choices.get("guidelines_mode")
         if gm and gm not in ("single", "multi"):
@@ -1038,8 +1038,8 @@ def main():
                    help="Phase to validate (1-5, 'all', or 'state')")
     p.add_argument("--workspace", required=True)
     p.add_argument("--project-root", default=None)
-    p.add_argument("--delivery-mode", default="install", choices=["install", "plugin"],
-                   help="Delivery mode to validate against (default: install)")
+    p.add_argument("--delivery-mode", default="standalone", choices=["standalone", "plugin"],
+                   help="Delivery mode to validate against (default: standalone)")
     p.add_argument("--verbose", "-v", action="store_true", help="Show detailed output")
     args = p.parse_args()
 

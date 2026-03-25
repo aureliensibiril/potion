@@ -675,7 +675,7 @@ install or distribute.
    Store the user's choice in `state.json.user_choices.delivery_mode`:
    - "Run evaluation" → keep current mode, proceed to Phase 5
    - "Install as plugin" → `"plugin"`
-   - "Install to .claude/" → `"install"`
+   - "Install to .claude/" → `"standalone"`
    - "Review files first" → keep current mode, show files then re-ask
 
 ### Evaluation step (recommended)
