@@ -27,6 +27,14 @@ everything into a guidelines document, then generates skills and agents from
 that foundation. You validate and correct at each step — because you know
 your codebase better than any agent.
 
+For monorepos with multiple language stacks — say a Python backend and a
+TypeScript frontend — Potion detects this automatically and generates
+per-stack guidelines with stack-specific implementation agents. A master
+orchestrator analyzes tasks, determines which stacks are involved, and
+delegates to the right agents in the right order. Backend changes go first
+when the frontend depends on the API. Each agent loads only its stack's
+conventions, so Python patterns never leak into TypeScript skills.
+
 ## Installation
 
 ### Claude Code marketplace
@@ -87,13 +95,18 @@ knowledge from your merged PR comments — filtering out bot noise to surface
 what your team actually enforces during review.
 
 **Phase 3 — Synthesize.** The pattern-synthesizer cross-references all
-profiles, documentation, and review patterns into a unified guidelines
-document. Code patterns get reconciled with documented standards and
-review-enforced conventions.
+profiles, documentation, and review patterns into guidelines. For single-stack
+projects, this is one unified document. For multi-stack monorepos, a shared
+synthesizer extracts cross-cutting conventions first, then per-stack
+synthesizers run in parallel — each producing guidelines scoped to its
+language.
 
 **Phase 4 — Generate.** The skill-writer produces the final skill pack
-from templates grounded in your guidelines. Skills, agents, review checklists,
-test prompts — all referencing your real files and patterns.
+from templates grounded in your guidelines. For multi-stack projects, this
+includes master skills that orchestrate stack-specific sub-agents — a master
+implementer that routes tasks to the right stack's agent, a master planner
+that creates stack-labeled sections, and a master reviewer that passes stack
+context to topic reviewers.
 
 **Phase 5 — Evaluate (optional).** Test generated skills with realistic
 prompts. Compare responses with and without the skill loaded. Iterate on
@@ -103,14 +116,14 @@ failures before delivery.
 
 | Output | What it does |
 |--------|-------------|
-| **guidelines.md** | The codebase DNA — architecture, patterns, conventions, pitfalls |
+| **guidelines** | The codebase DNA — architecture, patterns, conventions, pitfalls. Per-stack in monorepos. |
 | **ask skill** | Answers questions about the codebase with real file references |
 | **plan skill** | Designs implementation approaches following your architecture |
 | **implement skill** | Writes code following your actual patterns and conventions |
 | **review skill** | Reviews code against your real standards, not generic rules |
 | **explorer agent** | Read-only codebase navigation |
 | **planner agent** | Plans complex features respecting your architecture |
-| **implementer agent** | Implements features scoped to your conventions |
+| **implementer agent(s)** | Implements features scoped to your conventions. One per stack in monorepos. |
 | **reviewer agent** | Reviews code with your checklist (plus specialized sub-agents for larger projects) |
 | **test-prompts.md** | Realistic prompts for evaluating the generated skills |
 
@@ -122,8 +135,11 @@ The plugin itself is a pipeline of specialized agents:
 - **module-explorer** — Phase 2. Deep-dives into each module to extract patterns, conventions, and canonical examples.
 - **doc-scanner** — Phase 2. Discovers existing documentation, AI instructions, ADRs, config-enforced rules.
 - **pr-review-miner** — Phase 2. Mines merged PR review comments for enforced conventions and tribal knowledge. Filters out bot comments (CodeRabbit, Copilot, SonarQube, etc.) to focus on what humans actually say during review.
-- **pattern-synthesizer** — Phase 3. Reconciles code patterns, documented standards, and review culture into a unified guidelines document.
-- **skill-writer** — Phase 4. Generates the skill pack from templates grounded in the guidelines.
+- **git-workflow-scanner** — Phase 2. Analyzes git history for commit format, branching strategy, merge method, and PR process.
+- **pattern-synthesizer** — Phase 3. Reconciles code patterns, documented standards, and review culture into guidelines. For single-stack projects.
+- **shared-synthesizer** — Phase 3. Extracts cross-cutting conventions (git, CI/CD, deployment) shared across all stacks. For multi-stack monorepos.
+- **stack-synthesizer** — Phase 3. Produces per-stack guidelines. One instance per stack, all in parallel. For multi-stack monorepos.
+- **skill-writer** — Phase 4. Generates the skill pack from templates. In multi-stack mode, produces master skills + per-stack sub-agents.
 
 Templates for all generated outputs live in `assets/templates/`. JSON contracts
 for agent I/O live in `references/output-schemas.md`. Phase instructions live
@@ -147,6 +163,10 @@ demand — agents only load what they need.
   conventions, patterns enforced through review but never written down — these
   are captured and codified so the next developer doesn't have to learn them
   the hard way.
+
+- **Stack isolation in monorepos.** Python agents load Python guidelines.
+  TypeScript agents load TypeScript guidelines. The master coordinates, but
+  each agent works in its own world. No cross-contamination.
 
 - **Evaluation before delivery.** Skills are tested with realistic prompts
   before packaging. With-and-without comparison shows the actual improvement.
