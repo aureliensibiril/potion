@@ -55,7 +55,14 @@ Reviewers: Read, Glob, Grep (no Write/Edit)
 Explorers: Read, Glob, Grep (no Write/Edit)
 Implementers: Read, Write, Edit, Glob, Grep, Bash
 
-### 5. Description optimization
+### 5. Model selection in multi-stack mode
+
+ALL master skills and stack-specific sub-agents MUST use `model: opus`.
+This applies to:
+- Master implement, plan, review skills
+- Per-stack implementer agents
+
+### 6. Description optimization
 
 For each generated skill and agent, produce 3 candidate descriptions with
 different trigger phrasings and emphasis. Evaluate each candidate against
@@ -76,6 +83,10 @@ The guidelines path depends on delivery mode AND guidelines mode:
 ### Multi-file guidelines
 - **Standalone mode**: `.claude/guidelines/` directory
 - **Plugin mode**: `${CLAUDE_PLUGIN_ROOT}/guidelines/` directory
+
+### Multi-stack guidelines
+- **Standalone mode**: `.claude/guidelines/shared.md` + `.claude/guidelines/{stack_name}/`
+- **Plugin mode**: `${CLAUDE_PLUGIN_ROOT}/guidelines/shared.md` + `${CLAUDE_PLUGIN_ROOT}/guidelines/{stack_name}/`
 
 ## Standalone mode (default)
 
@@ -186,6 +197,57 @@ directory. It is generation metadata, not part of the distributable plugin.
 In install mode, skills reference agents as `{project_name}-explorer`, etc.
 In plugin mode, just say "the explorer agent" or "the implementer agent" —
 the plugin namespace handles routing.
+
+## Template selection by stack mode
+
+### If stack_mode is "single" (default)
+
+Use the standard templates:
+- `implement-skill.md` → one implement skill
+- `plan-skill.md` → one plan skill
+- `review-skill.md` → one review skill
+- `ask-skill.md` → one ask skill
+- `implementer-agent.md` → one implementer agent
+- `explorer-agent.md`, `planner-agent.md`, `reviewer-agent.md` → one each
+
+### If stack_mode is "multi"
+
+Use multi-stack templates:
+- `master-implement-skill.md` → master implement skill (orchestrator)
+- `master-plan-skill.md` → master plan skill
+- `master-review-skill.md` → master review skill
+- `ask-skill.md` → single ask skill (with stack-aware routing added)
+- For EACH stack in stacks[]:
+  - `stack-implementer-agent.md` → `{stack_name}-implementer` agent
+- `explorer-agent.md`, `planner-agent.md`, `reviewer-agent.md` → shared across stacks
+
+### Stack-specific Handlebars variables
+
+When rendering multi-stack templates, populate these variables per stack:
+- `{{stacks}}` — full array of stack objects from state.json
+- `{{stack_name}}` — e.g. `python-backend`
+- `{{stack_display_name}}` — e.g. `Python Backend`
+- `{{stack_language}}` — e.g. `python`
+- `{{stack_frameworks}}` — e.g. `FastAPI, Dagster`
+- `{{stack_guidelines_path}}` — path to this stack's guidelines directory
+- `{{shared_guidelines_path}}` — path to shared.md
+- `{{stack_module_map_table}}` — module map filtered to this stack's modules
+- `{{stack_patterns_summary}}` — patterns from this stack's patterns.md
+- `{{stack_error_handling}}` — error handling from this stack's patterns
+- `{{stack_testing_instructions}}` — testing from this stack's testing.md
+- `{{stack_test_framework}}`, `{{stack_test_naming}}`, `{{stack_test_command}}`
+- `{{stack_file_placement}}` — file placement rules from this stack
+- `{{stack_pitfalls}}` — pitfalls from this stack's pitfalls.md
+
+### Ask skill in multi-stack mode
+
+The ask skill uses the standard `ask-skill.md` template but with additional
+stack-aware routing. The skill-writer adds a "Stack Routing" section that
+tells the skill how to determine which stack's guidelines to load based on
+the question context:
+- Language keywords (python, pytest, typescript, react) → route to that stack
+- Module names → look up which stack the module belongs to
+- Ambiguous questions → load shared.md first, ask user to clarify stack
 
 ## What to generate
 
