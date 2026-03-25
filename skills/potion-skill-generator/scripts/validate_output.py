@@ -166,6 +166,20 @@ def validate_phase1(ws):
     if submodule_count > 0:
         r.ok(f"{submodule_count} submodules across all modules")
 
+    # Validate language field on each module
+    valid_languages = {"python", "typescript", "javascript", "go", "rust", "java", "other"}
+    for m in modules:
+        lang = m.get("language")
+        if not lang:
+            r.warn(f"'{m['name']}' missing 'language' field")
+        elif lang not in valid_languages:
+            r.warn(f"'{m['name']}' has unknown language: {lang}")
+        # Check submodules
+        for s in m.get("submodules", []):
+            sub_lang = s.get("language")
+            if sub_lang and sub_lang not in valid_languages:
+                r.warn(f"'{m['name']}/{s.get('name')}' has unknown language: {sub_lang}")
+
     # Validate recommended_exploration_order references valid module names
     exploration_order = data.get("recommended_exploration_order", [])
     if exploration_order:
@@ -919,6 +933,20 @@ def validate_state(ws):
         gm = choices.get("guidelines_mode")
         if gm and gm not in ("single", "multi"):
             r.error(f"Invalid guidelines_mode: {gm}")
+
+    # Validate stack_mode and stacks
+    choices = data.get("user_choices", {})
+    stack_mode = choices.get("stack_mode")
+    if stack_mode and stack_mode not in ("single", "multi"):
+        r.warn(f"Invalid stack_mode: {stack_mode}")
+    stacks = choices.get("stacks", [])
+    if stack_mode == "multi" and len(stacks) < 2:
+        r.warn(f"stack_mode is 'multi' but only {len(stacks)} stacks defined")
+    for stack in stacks:
+        if not stack.get("name"):
+            r.warn("Stack missing 'name' field")
+        if not stack.get("modules"):
+            r.warn(f"Stack '{stack.get('name')}' has no modules")
 
     return r
 
