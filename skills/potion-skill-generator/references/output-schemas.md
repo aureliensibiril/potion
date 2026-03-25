@@ -455,6 +455,46 @@ phase4-output/
 - No file path in any skill that doesn't exist in the profiles
 - Specialized reviewers (agents/reviewers/) are optional — generated based on
   project size (see skill-writer scaling rules)
+- In multi-stack mode, per-stack implementer agents are generated dynamically —
+  one per qualifying stack. Their names follow `{stack_name}-implementer.md`.
+
+### Multi-stack skill pack layout
+
+When `stack_mode` is `"multi"`, the skill pack includes master skills and
+per-stack sub-agents:
+
+```
+phase4-output/
+├── guidelines/
+│   ├── shared.md
+│   ├── python-backend/
+│   │   ├── index.md, patterns.md, conventions.md, testing.md, pitfalls.md
+│   │   └── module-notes/
+│   └── typescript-frontend/
+│       ├── index.md, patterns.md, conventions.md, testing.md, pitfalls.md
+│       └── module-notes/
+├── skills/
+│   ├── potion-ask/SKILL.md                    # stack-aware ask skill
+│   ├── potion-plan/SKILL.md                   # master planner
+│   ├── potion-implement/SKILL.md              # master implementer
+│   └── potion-review/SKILL.md                 # master reviewer
+├── agents/
+│   ├── explorer.md
+│   ├── planner.md
+│   ├── python-backend-implementer.md          # stack-specific
+│   ├── typescript-frontend-implementer.md     # stack-specific
+│   ├── reviewer.md
+│   └── reviewers/                             # topic reviewers (stack-aware)
+├── test-prompts.md
+└── manifest.json
+```
+
+**Rules:**
+- Master skills (implement, plan, review) use `model: opus` and `allowed-tools` including `Agent`
+- Per-stack implementer agents use `model: opus` with full write tools
+- Each stack-specific agent loads `shared.md` + its stack's guidelines directory only
+- Topic reviewers (in `reviewers/`) receive stack context from the master reviewer
+- The number of stack-specific implementer agents equals the number of qualifying stacks
 
 **Reviewer scaling rules:**
 - Small projects (1-3 modules): generalist reviewer only, no sub-agents
