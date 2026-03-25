@@ -599,14 +599,23 @@ is installed in a different location.
     "selected_outputs": ["string — e.g. 'ask', 'implement', 'review'"],
     "skip_evaluation": "boolean",
     "delivery_mode": "standalone | plugin | review-only",
-    "guidelines_mode": "single | multi | null"
+    "guidelines_mode": "single | multi | null",
+    "stack_mode": "single | multi | null",
+    "stacks": [
+      {
+        "name": "string — auto-generated, e.g. 'python-backend'",
+        "language": "string — python | typescript | go | rust | java | other",
+        "frameworks": ["string — detected frameworks"],
+        "modules": ["string — module names belonging to this stack"]
+      }
+    ]
   }
 }
 ```
 
 **Rules:** `updated_at` refreshed on every phase transition, `status` transitions
 follow `pending → in_progress → completed | skipped | failed`, phases cannot
-regress (except via explicit user request to re-run a phase).
+regress (except via explicit user request to re-run a phase). `stack_mode` is set after Phase 1 by the orchestrator. `null` means not yet determined. `stacks` is empty when `stack_mode` is `single` or `null`.
 
 ---
 

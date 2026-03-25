@@ -85,7 +85,9 @@ only when you need to check a schema. Do not read the full files upfront.
        "selected_outputs": [],
        "skip_evaluation": false,
        "delivery_mode": "standalone",
-       "guidelines_mode": null
+       "guidelines_mode": null,
+       "stack_mode": null,
+       "stacks": []
      }
    }
    ```
