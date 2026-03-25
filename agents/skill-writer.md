@@ -9,7 +9,7 @@ description: >
   target project's patterns, conventions, and architecture. Handles both
   install mode (loose files) and plugin mode (distributable package).
 tools: Read, Write, Edit, Glob, Grep, Bash
-model: sonnet
+model: opus
 effort: high
 maxTurns: 120
 ---

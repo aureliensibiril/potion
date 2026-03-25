@@ -10,7 +10,7 @@ description: >
   dominant, or module-specific, reconciles documentation with code reality,
   and produces actionable guidelines for both humans and AI agents.
 tools: Read, Write, Glob, Grep
-model: sonnet
+model: opus
 effort: high
 maxTurns: 120
 ---
