@@ -175,13 +175,25 @@ for tribal knowledge.
    Save to {workspace}/phase2-git-workflow.json
    ```
 
-   Launch ALL agents (explorers + doc-scanner + git-workflow-scanner +
-   pr-review-miner) in the same turn.
+   Launch the first batch of explorers + doc-scanner + git-workflow-scanner
+   + pr-review-miner all in the same turn.
 
 3. **Batching for large codebases:** Count each exploration unit individually
    (a module with 3 submodules = 3 units). If more than 8 units, batch
-   explorers in groups of 3-5. The doc-scanner and pr-review-miner always
-   run with the first batch.
+   explorers in groups of 3-5.
+
+   **Important: explorer batches are independent of the pr-review-miner.**
+   When a batch of explorers completes, launch the next batch immediately —
+   do NOT wait for the pr-review-miner or git-workflow-scanner to finish.
+   These long-running agents run in parallel with all explorer batches.
+
+   The doc-scanner and git-workflow-scanner run with the first batch.
+   The pr-review-miner also starts with the first batch but may outlast
+   all explorer batches — that's expected.
+
+   Only wait for ALL agents (all explorer batches + doc-scanner +
+   git-workflow-scanner + pr-review-miner) to complete before proceeding
+   to the user gate.
 
 4. **As explorers complete**, collect profiles and watch for:
    - Conflicting pattern descriptions (sign of codebase inconsistency)

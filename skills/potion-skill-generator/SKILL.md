@@ -116,18 +116,30 @@ explore the module itself.
    → If success: platform = `"gitlab"`
 3. Else: PR review mining unavailable, will skip the agent.
 
-Spawn **all module-explorer agents, the doc-scanner, and the git-workflow-scanner**
-in parallel. If platform was detected, also spawn the **pr-review-miner agent**.
+Spawn agents in two independent tracks that run concurrently:
 
-- Doc-scanner: saves to `{workspace}/phase2-docs.json`
-- Git-workflow-scanner: saves to `{workspace}/phase2-git-workflow.json`
-- PR-review-miner: saves to `{workspace}/phase2-reviews.json`
+**Track A — Module exploration (batched):**
+Launch module-explorer agents in batches. When a batch completes,
+immediately launch the next batch — do NOT wait for Track B agents.
+Include the doc-scanner and git-workflow-scanner in the first batch.
+
+**Track B — PR review mining (long-running):**
+If platform was detected, spawn the pr-review-miner agent alongside
+Track A's first batch. It runs independently and may take longer than
+all explorer batches combined. That's fine.
+
+Output files:
+- Module explorers: `{workspace}/phase2-profiles/{name}.json`
+- Doc-scanner: `{workspace}/phase2-docs.json`
+- Git-workflow-scanner: `{workspace}/phase2-git-workflow.json`
+- PR-review-miner: `{workspace}/phase2-reviews.json`
 
 Read `references/phases.md § Phase 2` for batching rules and how to present
 findings.
 
-**Wait for all agents** to complete before proceeding to the user gate. If any
-agent times out, re-run it before moving on.
+**At the end:** wait for BOTH tracks to complete before proceeding to the
+user gate. All explorer batches must finish AND the pr-review-miner must
+finish. If any agent times out, re-run it before moving on.
 
 Update `state.json`: set `phases.2.status` to `"in_progress"` at start. Track each
 unit in `phases.2.module_statuses` using `{parent}/{submodule}` keys for submodules,
