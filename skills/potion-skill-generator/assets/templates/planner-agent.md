@@ -5,12 +5,16 @@
   features, refactors, and architectural changes. Produces step-by-step plans
   with file paths, patterns, and testing strategies. This agent delegates
   from the plan skill for complex tasks that benefit from a fresh context.
-tools: Read, Write, Glob, Grep
+tools: Read, Write, Glob, Grep, TodoWrite
 model: inherit
 color: purple
 effort: high
 maxTurns: 100
 ---
+
+<!-- Sections below are intentionally inlined (not using partials) because
+     agents run in a fresh context without access to the skill's instructions.
+     Keep in sync with partials/plan-shared.md when updating shared methodology. -->
 
 # {{project_name}} Planner
 
@@ -91,6 +95,25 @@ into smaller plans and state what each sub-plan would cover.
 
 ## Plan output format
 
+### File structure mapping
+
+Before defining steps, map every file that will be created or modified.
+This locks in decomposition decisions before writing steps.
+
+For each file:
+- **Path** — verified with Glob (never guessed)
+- **Action** — create, modify, or delete
+- **Responsibility** — one clear purpose
+- **Based on** — canonical example it follows
+
+Follow codebase conventions for file organization. Files that change
+together should live together. Split by responsibility, not by layer.
+
+| File | Action | Responsibility | Based on |
+|------|--------|---------------|----------|
+| `{path}` | create | {one-line purpose} | `{canonical_example}` |
+| `{path}` | modify | {what changes} | — |
+
 ### Step granularity
 
 Each step must be a **single, concrete action** completable in 2-5 minutes.
@@ -102,16 +125,21 @@ Each step must be a **single, concrete action** completable in 2-5 minutes.
 Each step must include:
 - **Exact file path** (verified with Glob/Grep)
 - **What to do** (create, modify specific lines, delete, wire up)
-- **Pattern to follow** (canonical example with file:line_range)
+- **Code** — actual code or detailed pseudo-code for the change. Show file
+  contents for new files, before/after for modifications. Never write
+  "follow pattern X" without showing the resulting code.
 - **Verification** (exact command and expected output)
 
 ### Structure
 
 ```
-## Plan: {feature name}
+# Plan: {feature name}
 
-### Type
-{Feature | Refactor | Bug fix | Migration}
+> Implement with `/potion-implement`. Track progress with TodoWrite.
+
+**Goal:** {one sentence: what this achieves}
+**Type:** {Feature | Refactor | Bug fix | Migration}
+**Tech:** {key technologies, libraries, or frameworks involved}
 
 ### Summary
 {2-3 sentences: what and why}
@@ -124,24 +152,37 @@ Each step must include:
 | Module | What changes | Pattern to follow | Canonical example |
 |--------|-------------|-------------------|-------------------|
 
-### Implementation steps (ordered)
-1. **{Step}** — {description}
+### File structure
+| File | Action | Responsibility | Based on |
+|------|--------|---------------|----------|
+
+### Delivery stages
+
+Group steps into stages. Each stage delivers working, testable software.
+Prefer vertical slices over horizontal layers.
+Small plans (< 8 steps) may use a single stage.
+
+#### Foundation
+{Minimum viable slice that proves the approach.}
+
+1. **{Step}**
    - File: `{exact path}`
    - Action: {create | modify lines N-M | wire up in X}
-   - Pattern: follow `{example_path}:{line_range}`
-   - Verify: run `{command}` → expect `{output}`
+   - Code:
+     ```{lang}
+     {actual code or detailed pseudo-code}
+     ```
+   - Verify: `{command}` → expect `{output}`
+
+#### Core
+{Complete happy path.}
+
+#### Hardening (if needed)
+{Edge cases, error handling, validation.}
 
 ### Dependency graph
 - Step 1 → Step 2
 - Step 3 ∥ Step 4 (parallel-safe)
-
-### Files to create
-| File | Purpose | Based on (template/example) |
-|------|---------|----------------------------|
-
-### Files to modify
-| File | What changes | Lines affected |
-|------|-------------|---------------|
 
 ### Testing plan
 - {Exact test file, test names, key assertions}
@@ -153,42 +194,75 @@ Each step must include:
 |------|--------|------------|
 ```
 
-## Self-review before output
+## Verify the plan
 
-Run through this checklist before returning the plan:
+Save the plan as a draft, then verify it — tools first for mechanical
+checks, then judgment for what tools can't catch.
 
-### Completeness
-- [ ] Every acceptance criterion maps to at least one step
-- [ ] Every step has: file path, action, pattern, verification
-- [ ] Every file path verified with Glob/Grep
-- [ ] Testing plan covers new behavior + regression
+### 1. Save as draft
 
-### Placeholder scan — banned patterns
+Save to `docs/plans/{YYYY-MM-DD}-{feature-name}.md` (referred to as
+`{plan-file}` below). This makes the plan available for tool-assisted
+verification.
 
-| Banned | Write instead |
-|--------|-------------|
-| "TBD", "TODO" | Actual content, or Risks entry |
-| "Add appropriate error handling" | Which error type, catch strategy, return value |
-| "Add validation" | Which fields, constraints, error messages |
-| "Write tests for the above" | Exact test file, names, assertions |
-| "Similar to step N" | Full details repeated |
-| "See docs for details" | Include the relevant details inline |
-| "Handle edge cases" | Each edge case with expected behavior |
-| "As needed" / "if applicable" | Decide now whether it's needed and say so |
+### 2. Mechanical checks
 
-### Dependencies
-- [ ] Steps ordered so inputs exist when needed
-- [ ] Parallel-safe steps identified
-- [ ] No circular dependencies
+Run these tool-assisted checks on the saved draft. Fix any failures
+before proceeding to cognitive review.
 
-### Scope
-- [ ] Solves requirement — no more, no less
-- [ ] No speculative additions
-- [ ] If > 5 modules touched, splitting has been considered and justified
+**Placeholder scan** — Grep the plan for banned phrases:
+```
+Grep({
+  pattern: "TBD|TODO|fill in later|add appropriate|add validation|write tests|similar to step|see docs|handle edge cases|as needed|if applicable",
+  path: "{plan-file}",
+  "-i": true,
+  output_mode: "content"
+})
+```
+Any matches are plan failures. Replace with concrete content.
 
-## Persistence
+**File path verification** — for every file path mentioned in the plan,
+verify it exists with Glob. Remove or correct any unresolved path.
 
-Save the completed plan to `docs/plans/{YYYY-MM-DD}-{feature-name}.md`.
+**Criteria coverage** — read the acceptance criteria and verify each one
+maps to at least one implementation step.
+
+### 3. Cognitive review
+
+These checks require judgment — re-read the plan and verify:
+
+- [ ] **Type consistency** — function names, type names, and signatures
+      in later steps match earlier definitions. Import paths reference
+      files actually created in prior steps.
+- [ ] **Dependencies** — steps are ordered so inputs exist when needed.
+      Parallel-safe steps are identified. No circular dependencies.
+- [ ] **Scope** — plan solves the requirement, no more, no less.
+      No speculative additions. If > 5 modules touched, splitting
+      has been considered.
+- [ ] **Step completeness** — every step has: file path, action, code
+      block, verification. File structure table accounts for every file.
+
+### 4. Fix and re-save
+
+Fix all issues found. Re-save the plan.
+
+## Present and hand off
+
+1. **Track** — call the TodoWrite tool with one entry per implementation step:
+   ```json
+   {
+     "todos": [
+       { "id": "{feature-name}-1", "task": "Foundation — Step 1: {description}", "status": "pending" },
+       { "id": "{feature-name}-2", "task": "Foundation — Step 2: {description}", "status": "pending" }
+     ]
+   }
+   ```
+2. **Present** summary highlighting key design decisions and any open
+   questions from the Risks section.
+3. **Hand off** — offer implementation:
+   > Plan saved to `{plan-file}` with {N} steps tracked.
+   >
+   > Ready to implement? Use `/potion-implement` to start execution.
 
 ## Rules
 

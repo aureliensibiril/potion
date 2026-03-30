@@ -8,7 +8,7 @@
   feature requests, or specs that need an implementation approach. Even "what
   files would I need to change for X" or "what's the best approach for X"
   should activate this skill.
-allowed-tools: Read, Write, Glob, Grep, AskUserQuestion, Agent
+allowed-tools: Read, Write, Glob, Grep, AskUserQuestion, Agent, TodoWrite
 model: inherit
 effort: high
 ---
@@ -147,28 +147,20 @@ These are real issues found in this codebase — check each one against your pla
 
 ## Phase 2: Produce the plan
 
-### Step granularity
+{{> partials/plan-shared#file-structure-mapping}}
 
-Each step must be a **single, concrete action** completable in 2-5 minutes.
-
-**Bad step:** "Implement the service layer"
-**Good step:** "Create `src/billing/services/invoice.service.ts` with the
-`createInvoice` method following the pattern in
-`src/orders/services/order.service.ts:23-45`"
-
-Each step must include:
-- **Exact file path** (verified with Glob/Grep — never guessed)
-- **What to do** (create, modify specific lines, delete, wire up)
-- **Pattern to follow** (canonical example with file path and line range)
-- **Verification** (exact command to run and expected output)
+{{> partials/plan-shared#step-granularity}}
 
 ### Plan output format
 
 ```
-## Plan: {feature name}
+# Plan: {feature name}
 
-### Type
-{Feature | Refactor | Bug fix | Migration}
+> Implement with `/potion-implement`. Track progress with TodoWrite.
+
+**Goal:** {one sentence: what this achieves}
+**Type:** {Feature | Refactor | Bug fix | Migration}
+**Tech:** {key technologies, libraries, or frameworks involved}
 
 ### Summary
 {2-3 sentences: what this plan achieves and why this approach was chosen
@@ -182,31 +174,47 @@ over alternatives}
 | Module | What changes | Pattern to follow | Canonical example |
 |--------|-------------|-------------------|-------------------|
 
-### Implementation steps
-{Ordered list. Each step is 2-5 minutes of work.}
+### File structure
+
+| File | Action | Responsibility | Based on |
+|------|--------|---------------|----------|
+| `{exact path}` | create | {one-line purpose} | `{canonical_example}` |
+| `{exact path}` | modify | {what changes} | — |
+
+### Delivery stages
+
+Group steps into stages. Each stage delivers working, testable software.
+Prefer vertical slices (feature-complete for a subset) over horizontal
+layers (all models, then all services, then all routes).
+Small plans (< 8 steps) may use a single stage.
+
+#### Foundation
+{Minimum viable slice that proves the approach works.}
 
 1. **{Step name}**
    - File: `{exact path to create or modify}`
    - Action: {create | modify lines N-M | delete | wire up in X}
-   - Pattern: follow `{canonical_example_path}:{line_range}`
-   - Verify: run `{exact command}` → expect `{expected output}`
+   - Code:
+     ```{lang}
+     {actual code or detailed pseudo-code for this change}
+     ```
+   - Verify: `{exact command}` → expect `{expected output}`
 
 2. **{Step name}**
    ...
 
+#### Core
+{Complete happy path.}
+
+3. **{Step name}**
+   ...
+
+#### Hardening (if needed)
+{Edge cases, error handling, validation.}
+
 ### Dependency graph
-{Which steps depend on which. Identify parallel-safe steps.}
 - Step 1 → Step 2 (Step 2 uses types defined in Step 1)
 - Step 3 ∥ Step 4 (independent, can run in parallel)
-- Step 5 depends on Steps 3 and 4
-
-### Files to create
-| File | Purpose | Based on (template/example) |
-|------|---------|----------------------------|
-
-### Files to modify
-| File | What changes | Lines affected (approx) |
-|------|-------------|------------------------|
 
 ### Testing plan
 - {Exact test file to create and test names}
@@ -222,51 +230,27 @@ over alternatives}
 
 ---
 
-## Phase 3: Self-review
+## Phase 3: Verify the plan
 
-Before presenting the plan, run through this checklist. Fix any failures
-before the user sees the plan.
+Save the plan as a draft, then verify it — tools first for mechanical
+checks, then judgment for what tools can't catch. Non-trivial plans get
+parallel review agents for fresh eyes.
 
-### Completeness
-- [ ] Every acceptance criterion maps to at least one implementation step
-- [ ] Every step has: file path, action, pattern reference, verification command
-- [ ] Every file path has been verified with Glob/Grep (not guessed)
-- [ ] Testing plan covers all new behavior and at least one regression case
+{{> partials/plan-shared#verify-save-draft}}
 
-### Placeholder scan
+{{> partials/plan-shared#verify-mechanical}}
 
-Search the plan for these banned patterns — each one is a plan failure:
+{{> partials/plan-shared#verify-cognitive}}
 
-| Banned phrase | What to write instead |
-|--------------|----------------------|
-| "TBD", "TODO", "fill in later" | The actual content, or add to Risks as an open question |
-| "Add appropriate error handling" | Which error type, how to catch it, what to return |
-| "Add validation" | Which fields, what constraints, what error messages |
-| "Write tests for the above" | Exact test file, test names, and key assertions |
-| "Similar to step N" | Repeat the full details — steps may be read out of order |
-| "See docs for details" | Include the relevant details inline |
-| "Handle edge cases" | List each edge case and its expected behavior |
-| "As needed" / "if applicable" | Decide now whether it's needed and say so |
+{{> partials/plan-shared#verify-parallel-agents}}
 
-### Dependencies
-- [ ] Steps are ordered so each step's inputs exist when it runs
-- [ ] Parallel-safe steps are explicitly identified
-- [ ] No circular dependencies
-
-### Scope
-- [ ] Plan solves the stated requirement — no more, no less
-- [ ] No speculative features or "while we're at it" additions
-- [ ] If > 5 modules touched, splitting has been considered and justified
+{{> partials/plan-shared#verify-fix}}
 
 ---
 
-## Phase 4: Save and present
+## Phase 4: Present and hand off
 
-1. Save the completed plan to `docs/plans/{YYYY-MM-DD}-{feature-name}.md` in
-   the project. This makes it persistent across sessions and reviewable by
-   teammates.
-2. Present a summary to the user highlighting key design decisions and any
-   remaining open questions from the Risks section.
+{{> partials/plan-shared#present-and-handoff}}
 
 ## Key patterns quick reference
 

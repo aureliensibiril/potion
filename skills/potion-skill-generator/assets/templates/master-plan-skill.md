@@ -9,7 +9,7 @@
   something. It also triggers for tickets, user stories, feature requests, or
   specs that need an implementation approach. Even "what files would I need to
   change for X" or "what's the best approach for X" should activate this skill.
-allowed-tools: Read, Write, Glob, Grep, AskUserQuestion, Agent
+allowed-tools: Read, Write, Glob, Grep, AskUserQuestion, Agent, TodoWrite
 model: opus
 effort: high
 ---
@@ -176,28 +176,20 @@ These are real issues found in this codebase — check each one against your pla
 
 ## Phase 2: Produce the plan
 
-### Step granularity
+{{> partials/plan-shared#file-structure-mapping}}
 
-Each step must be a **single, concrete action** completable in 2-5 minutes.
-
-**Bad step:** "Implement the backend service"
-**Good step:** "Create `src/billing/services/invoice.service.ts` with the
-`createInvoice` method following the pattern in
-`src/orders/services/order.service.ts:23-45`"
-
-Each step must include:
-- **Exact file path** (verified with Glob/Grep — never guessed)
-- **What to do** (create, modify specific lines, delete, wire up)
-- **Pattern to follow** (canonical example with file path and line range)
-- **Verification** (exact command to run and expected output)
+{{> partials/plan-shared#step-granularity}}
 
 ### Plan output format
 
 ```
-## Plan: {feature name}
+# Plan: {feature name}
 
-### Type
-{Feature | Refactor | Bug fix | Migration}
+> Implement with `/potion-implement`. Track progress with TodoWrite.
+
+**Goal:** {one sentence: what this achieves}
+**Type:** {Feature | Refactor | Bug fix | Migration}
+**Tech:** {key technologies, libraries, or frameworks involved}
 
 ### Summary
 {2-3 sentences: what this plan achieves and why this approach}
@@ -216,18 +208,32 @@ Each step must include:
 {{#each stacks}}
 ## {{display_name}} ({{language}})
 
-### Implementation steps
-{Numbered steps, each 2-5 minutes. Reference real files and patterns.}
+### File structure
+| File | Action | Responsibility | Based on |
+|------|--------|---------------|----------|
+
+### Delivery stages
+
+Group steps into stages. Each stage delivers working, testable software.
+Small changes within this stack may use a single stage.
+
+#### Foundation
+{Minimum viable slice for this stack.}
 
 1. **{Step name}**
    - File: `{exact path}`
    - Action: {create | modify lines N-M | wire up in X}
-   - Pattern: follow `{canonical_example}:{line_range}`
-   - Verify: run `{command}` → expect `{output}`
+   - Code:
+     ```{lang}
+     {actual code or detailed pseudo-code}
+     ```
+   - Verify: `{command}` → expect `{output}`
 
-### Files to create/modify
-| File | Action | Based on |
-|------|--------|----------|
+#### Core
+{Complete happy path for this stack.}
+
+#### Hardening (if needed)
+{Edge cases, error handling, validation.}
 
 ### Testing
 - {Exact test file and test names}
@@ -252,31 +258,17 @@ Each step must include:
 
 ---
 
-## Phase 3: Self-review
+## Phase 3: Verify the plan
 
-Before presenting the plan, run through this checklist. Fix any failures
-before the user sees the plan.
+Save the plan as a draft, then verify it — tools first for mechanical
+checks, then judgment for what tools can't catch. Non-trivial plans get
+parallel review agents for fresh eyes.
 
-### Completeness
-- [ ] Every acceptance criterion maps to at least one implementation step
-- [ ] Every step has: file path, action, pattern reference, verification command
-- [ ] Every file path has been verified with Glob/Grep (not guessed)
-- [ ] Testing plan covers all new behavior and cross-stack integration
+{{> partials/plan-shared#verify-save-draft}}
 
-### Placeholder scan
+{{> partials/plan-shared#verify-mechanical}}
 
-Search the plan for these banned patterns — each one is a plan failure:
-
-| Banned phrase | What to write instead |
-|--------------|----------------------|
-| "TBD", "TODO", "fill in later" | The actual content, or add to Risks as an open question |
-| "Add appropriate error handling" | Which error type, how to catch it, what to return |
-| "Add validation" | Which fields, what constraints, what error messages |
-| "Write tests for the above" | Exact test file, test names, and key assertions |
-| "Similar to step N" | Repeat the full details — steps may be read out of order |
-| "See docs for details" | Include the relevant details inline |
-| "Handle edge cases" | List each edge case and its expected behavior |
-| "As needed" / "if applicable" | Decide now whether it's needed and say so |
+{{> partials/plan-shared#verify-cognitive}}
 
 ### Cross-stack coherence
 - [ ] API contracts match between upstream and downstream steps
@@ -284,25 +276,15 @@ Search the plan for these banned patterns — each one is a plan failure:
 - [ ] Execution order is justified by data flow direction
 - [ ] No orphaned references (e.g., frontend calling an API not in the plan)
 
-### Dependencies
-- [ ] Steps are ordered so each step's inputs exist when it runs
-- [ ] Parallel-safe steps (within and across stacks) are explicitly identified
-- [ ] No circular dependencies
+{{> partials/plan-shared#verify-parallel-agents}}
 
-### Scope
-- [ ] Plan solves the stated requirement — no more, no less
-- [ ] No speculative features or "while we're at it" additions
-- [ ] If > 5 modules touched, splitting has been considered and justified
+{{> partials/plan-shared#verify-fix}}
 
 ---
 
-## Phase 4: Save and present
+## Phase 4: Present and hand off
 
-1. Save the completed plan to `docs/plans/{YYYY-MM-DD}-{feature-name}.md` in
-   the project. This makes it persistent across sessions and reviewable by
-   teammates.
-2. Present a summary to the user highlighting key design decisions, execution
-   order rationale, and any remaining open questions from the Risks section.
+{{> partials/plan-shared#present-and-handoff}}
 
 ## Key patterns quick reference
 
