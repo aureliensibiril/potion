@@ -1,6 +1,6 @@
 ---
 name: pr-miner
-color: red
+color: magenta
 description: >
   Fetches and classifies review comments from a single pull request to extract
   actionable conventions. Returns structured findings as JSON. This agent is

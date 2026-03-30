@@ -86,10 +86,11 @@ For each drift item, recommend one of:
 - **`enforce-convention`**: The guideline is correct but not being followed.
   The codebase should be brought in line.
 
-To decide: check if recent files (modified in last 3 months) follow the old
-or new pattern. If recent code follows the new pattern, it's likely
-intentional evolution → `update-guideline`. If drift is scattered across
-old and new files, it's erosion → `enforce-convention`.
+To decide: check if newer-looking files (recently added modules, latest
+feature directories, files with modern patterns) follow the old or new
+convention. If newer code follows the new pattern, it's likely intentional
+evolution → `update-guideline`. If drift is scattered across both old and
+new-looking code, it's erosion → `enforce-convention`.
 
 Estimate effort: count approximate number of files that would need changing
 for `enforce-convention`.

@@ -2,7 +2,7 @@
 name: potion-learn
 description: "Learns from PR reviews, free-form feedback, and codebase drift to evolve project guidelines. Mines human review comments from a specific PR, parses free-form text input (CodeRabbit exports, meeting notes), detects when the codebase has drifted from guidelines, challenges every finding with devil's advocate reasoning, and stages learnings for reviewed merge into guidelines. Use when the user asks to learn from a PR, absorb feedback, update guidelines from reviews, check for guideline drift, or evolve project conventions."
 effort: high
-argument-hint: "[--pr NUMBER] [--text \"...\"] [--file path] [--drift-only]"
+argument-hint: "[--pr NUMBER] [--text \"...\"] [--file path] [--drift-only] [--merge]"
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash, Agent, AskUserQuestion
 ---
 
@@ -43,10 +43,16 @@ Parse `$ARGUMENTS` to determine the input mode:
 | `--text "..."` | Text mode (inline) | `--text "Always validate webhooks"` |
 | `--file PATH` | Text mode (from file) | `--file notes.txt` |
 | `--drift-only` | Drift-only mode | `--drift-only` |
+| `--merge` | Merge pending learnings into guidelines | `--merge` |
 | (none) | Auto-detect PR from current branch | — |
 
 **Combining modes:** `--pr` and `--text`/`--file` can be combined (mixed mode).
-`--drift-only` is exclusive — skip PR and text gathering.
+`--drift-only` and `--merge` are exclusive — they cannot be combined with other modes.
+
+**Merge mode:** If `--merge` is specified, skip Phase 1 (Gather) and Phase 2
+(Challenge) entirely. Jump straight to reading existing `.claude/learnings.md`
+and presenting User Gate 2 (merge decision). This allows users to review and
+merge previously staged learnings without re-running the full pipeline.
 
 **Auto-detect PR:** If no `--pr` flag and not `--drift-only`:
 ```bash

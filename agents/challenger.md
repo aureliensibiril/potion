@@ -107,16 +107,17 @@ Apply the same challenge pipeline, plus:
 
 #### Intentional vs. accidental drift
 
-Check git history for the drifting files:
+Assess whether the drift is intentional evolution or accidental erosion:
 
-Read recent files in the drift evidence to look for patterns:
-- If newer files consistently use the "drifted" pattern, it's likely
-  intentional evolution → verdict should reflect this
-- If drift is scattered (some old, some new files), it's accidental
+Read files listed in the drift evidence and look for patterns:
+- If newer-looking files (recently added modules, latest feature directories)
+  consistently use the "drifted" pattern, it's likely intentional evolution →
+  verdict should reflect this
+- If drift is scattered across both old and new-looking code, it's accidental
   erosion → the guideline may still be valid
 
-Grep for comments, commit messages, or PR references that explain
-the divergence.
+Grep for TODO comments, migration notes, or inline explanations that
+reference the divergence.
 
 ### Output
 
