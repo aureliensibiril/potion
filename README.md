@@ -59,16 +59,16 @@ git clone https://github.com/aureliensibiril/potion.git ~/.claude/plugins/potion
 
 ## Usage
 
-After installing, just tell Claude what you want:
+The simplest way to run it:
+
+```
+/potion-skill-generator
+```
+
+Or tell Claude what you want in natural language:
 
 ```
 Generate a skill pack for this codebase
-```
-
-Or be more specific:
-
-```
-Analyze this project and create development skills and agents for my team
 ```
 
 If a skill pack already exists and your codebase has changed, ask for a refresh:
@@ -78,6 +78,21 @@ Refresh the skill pack — we've added a new module
 ```
 
 The generator will diff against the existing output and update only what changed.
+
+### Evolving guidelines over time
+
+Once you have a skill pack, guidelines don't have to stay static. Potion Learn
+feeds new knowledge back into your guidelines from three sources:
+
+```
+/potion-learn --pr 142           # Learn from a PR's review comments
+/potion-learn --text "Always validate webhook signatures before processing"
+/potion-learn --drift-only       # Check if guidelines still match the codebase
+```
+
+Every finding goes through a devil's advocate challenge before being accepted.
+Learnings stage in `.claude/learnings.md` first — you review and merge into
+guidelines when ready.
 
 ## How it works
 
@@ -141,9 +156,17 @@ The plugin itself is a pipeline of specialized agents:
 - **stack-synthesizer** — Phase 3. Produces per-stack guidelines. One instance per stack, all in parallel. For multi-stack monorepos.
 - **skill-writer** — Phase 4. Generates the skill pack from templates. In multi-stack mode, produces master skills + per-stack sub-agents.
 
+### Potion Learn agents
+
+- **pr-miner** — Fetches and classifies review comments from a single PR into actionable conventions.
+- **text-parser** — Normalizes free-form text (meeting notes, CodeRabbit exports, team decisions) into the same finding format.
+- **drift-detector** — Compares guidelines against the actual codebase, flags claims where adherence has dropped.
+- **challenger** — Devil's advocate. Argues against each finding, searching for counterexamples and assessing blast radius. Renders accept/reject/modify verdicts.
+- **learnings-writer** — Stages accepted findings in `.claude/learnings.md` and merges approved items into guidelines.
+
 Templates for all generated outputs live in `assets/templates/`. JSON contracts
-for agent I/O live in `references/output-schemas.md`. Phase instructions live
-in `references/phases.md`. The orchestrator (`SKILL.md`) routes to these on
+for agent I/O live in `references/` directories. Phase instructions live in
+`references/phases.md`. The orchestrators (`SKILL.md` files) route to these on
 demand — agents only load what they need.
 
 ## Philosophy
