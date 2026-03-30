@@ -194,7 +194,7 @@ directory. It is generation metadata, not part of the distributable plugin.
 
 ### 6. Agent cross-references
 
-In install mode, skills reference agents as `{project_name}-explorer`, etc.
+In install mode, skills reference agents as `potion-explorer`, etc.
 In plugin mode, just say "the explorer agent" or "the implementer agent" —
 the plugin namespace handles routing.
 
@@ -265,11 +265,26 @@ module, read canonical example, check for duplication, understand data flow),
 per-module patterns, testing requirements, file placement rules, pitfalls.
 
 ### skills/plan/SKILL.md
-Implementation planning. Must include: planning process (understand requirement,
-identify scope with module map, design approach per module, check pitfalls,
-produce structured plan), patterns quick reference, canonical examples, plan
-output format (summary, modules affected, implementation steps with file paths,
-files to create/modify, testing plan, risks).
+Implementation planning with a 4-phase structure:
+- **Phase 0 — Pre-planning gate:** Classify task type (feature/refactor/bugfix/
+  migration), explore codebase for context, ask targeted clarifying questions
+  via `AskUserQuestion` to surface ambiguity and gather acceptance criteria.
+- **Phase 1 — Design:** Restate requirement with acceptance criteria, identify
+  scope with module map, design approach using type-specific templates (each
+  task type has its own checklist), check pitfalls.
+- **Phase 2 — Produce:** Generate structured plan with 2-5 minute granular
+  steps (each with exact file path, action, pattern reference, verification
+  command), dependency graph with parallel-safe steps, testing plan with
+  exact test names, risks with mitigations.
+- **Phase 3 — Self-review:** Completeness check (criteria→steps mapping),
+  placeholder scan (banned phrases like "TBD", "add validation", "similar
+  to step N"), dependency validation, scope check.
+- **Phase 4 — Save:** Persist plan to `docs/plans/{date}-{name}.md`.
+
+Must include: patterns quick reference, canonical examples, no-placeholders
+policy with banned phrases table, plan output format with acceptance criteria
+and dependency graph. Tools: Read, Write, Glob, Grep, AskUserQuestion, Agent
+(Agent for delegating complex plans to the planner agent).
 
 ### skills/review/SKILL.md
 Code review. Must include: review checklist by category (architecture, patterns,
@@ -289,7 +304,11 @@ as quick-ref. Tools: Read, Write, Edit, Glob, Grep, Bash. Model: inherit.
 ### agents/planner.md
 Planning agent for complex features/refactors that need a fresh context window.
 Reference guidelines and plan skill. Include module map, patterns quick-ref,
-pitfalls, structured plan output format. Tools: Read, Glob, Grep. Model: inherit.
+pitfalls, type-specific planning approach (feature/refactor/bugfix/migration),
+structured plan output format with 2-5 minute granular steps, self-review
+checklist with placeholder scan, and plan persistence to `docs/plans/`.
+Tools: Read, Write, Glob, Grep. Model: inherit. Note: `AskUserQuestion`
+is intentionally excluded — agents operate non-interactively.
 
 ### agents/reviewer.md
 Generalist code review agent. Include compact checklist. Tools: Read, Glob, Grep.
@@ -310,7 +329,7 @@ Use templates in `${CLAUDE_SKILL_DIR}/assets/templates/reviewers/`. Each sub-age
 - Returns findings in the Review Finding JSON format (see output-schemas.md)
 - Gets the project-specific checklist items from the guidelines
 - Gets only the pitfalls relevant to its domain
-- **Install mode:** add `name: {project_name}-{role}-reviewer` to frontmatter
+- **Install mode:** add `name: potion-{role}-reviewer` to frontmatter
 - **Plugin mode:** omit `name` from frontmatter (same rule as all other agents)
 
 When sub-agents are generated, update the review skill to act as an orchestrator
