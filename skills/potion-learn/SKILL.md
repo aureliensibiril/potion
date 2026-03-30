@@ -70,8 +70,8 @@ mkdir -p .skill-gen-workspace/learn
 ## Phase 1 — GATHER
 
 Launch gather agents in parallel based on input mode. Drift detection
-always runs (unless `--drift-only` is the only mode, in which case skip
-PR and text).
+always runs regardless of input mode. In drift-only mode, only the Drift
+Detector launches (PR Miner and Text Parser are skipped).
 
 **Determine guidelines path:**
 ```

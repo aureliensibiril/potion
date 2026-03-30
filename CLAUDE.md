@@ -94,7 +94,7 @@ Add `--verbose` for detailed output. When `--phase all`, cross-phase validation 
 
 - **Agent definitions** use YAML frontmatter (`name`, `description`, `tools`, `model`, `effort`, `maxTurns`) followed by markdown instructions
 - **Skill definitions** use the same frontmatter format in `SKILL.md` files
-- **Output contracts** are JSON schemas defined in `references/output-schemas.md` — agents must return valid JSON matching these schemas
+- **Output contracts** are JSON schemas defined in `references/` directories (`output-schemas.md` for skill-generator, `finding-schema.md` for potion-learn) — agents must return valid JSON matching these schemas
 - **Templates** in `assets/templates/` use `{{placeholder}}` and `{{#each}}` Handlebars-style syntax
 - Agent tool restrictions must match their role: reviewers/explorers are read-only, implementers get write access
 - Skill descriptions should be "pushy" — include multiple trigger phrasings so Claude reliably activates them
