@@ -1,5 +1,5 @@
 ---
-{{#unless plugin_mode}}name: {{project_name}}-security-reviewer
+{{#unless plugin_mode}}name: potion-security-reviewer
 {{/unless}}description: >
   Reviews code changes for security issues in {{project_name}}.
   Checks authentication, authorization, data exposure, injection risks,

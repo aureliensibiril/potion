@@ -1,5 +1,5 @@
 ---
-{{#unless plugin_mode}}name: {{project_name}}-explorer
+{{#unless plugin_mode}}name: potion-explorer
 {{/unless}}description: >
   Read-only exploration agent for {{project_name}}. Navigates the codebase to
   answer questions, find relevant code, and trace data flows. This agent is

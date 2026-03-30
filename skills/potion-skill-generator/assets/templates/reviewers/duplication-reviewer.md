@@ -1,5 +1,5 @@
 ---
-{{#unless plugin_mode}}name: {{project_name}}-duplication-reviewer
+{{#unless plugin_mode}}name: potion-duplication-reviewer
 {{/unless}}description: >
   Reviews code changes for duplication and missed reuse opportunities in
   {{project_name}}. Detects near-identical logic, copy-paste patterns, and

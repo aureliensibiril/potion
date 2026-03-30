@@ -1,5 +1,5 @@
 ---
-{{#unless plugin_mode}}name: {{project_name}}-implementer
+{{#unless plugin_mode}}name: potion-implementer
 {{/unless}}description: >
   Implementation agent for {{project_name}}. Creates new code following
   project patterns. This agent delegates from the implement skill for complex

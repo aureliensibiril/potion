@@ -1,5 +1,5 @@
 ---
-{{#unless plugin_mode}}name: {{project_name}}-implement
+{{#unless plugin_mode}}name: potion-implement
 {{/unless}}description: >
   Master implementation orchestrator for {{project_name}}. Analyzes tasks,
   determines which language stacks are involved, and delegates to stack-specific

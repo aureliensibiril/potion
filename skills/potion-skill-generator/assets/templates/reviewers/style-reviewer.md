@@ -1,5 +1,5 @@
 ---
-{{#unless plugin_mode}}name: {{project_name}}-style-reviewer
+{{#unless plugin_mode}}name: potion-style-reviewer
 {{/unless}}description: >
   Reviews code changes for style and convention compliance in {{project_name}}.
   Checks naming, formatting, localization, export patterns, and code style

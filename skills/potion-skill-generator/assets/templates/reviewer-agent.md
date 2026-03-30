@@ -1,5 +1,5 @@
 ---
-{{#unless plugin_mode}}name: {{project_name}}-reviewer
+{{#unless plugin_mode}}name: potion-reviewer
 {{/unless}}description: >
   Code review agent for {{project_name}}. Analyzes code changes against
   project standards. This agent is read-only — it reports findings and does

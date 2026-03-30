@@ -1,5 +1,5 @@
 ---
-{{#unless plugin_mode}}name: {{project_name}}-pattern-reviewer
+{{#unless plugin_mode}}name: potion-pattern-reviewer
 {{/unless}}description: >
   Reviews code changes for pattern compliance in {{project_name}}.
   Checks error handling, data access, dependency injection, and type usage

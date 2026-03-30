@@ -1,5 +1,5 @@
 ---
-{{#unless plugin_mode}}name: {{project_name}}-review
+{{#unless plugin_mode}}name: potion-review
 {{/unless}}description: >
   Reviews code for {{project_name}} against its actual standards, not generic
   best practices. This skill should be used when someone asks to review a PR,
@@ -123,7 +123,7 @@ These are real issues found during codebase analysis:
 ## For large reviews
 
 For PRs touching more than 5 files or multiple modules, consider delegating
-to the `{{project_name}}-reviewer` agent for a focused, fresh-context review.
+to the `potion-reviewer` agent for a focused, fresh-context review.
 
 ## Reference files
 

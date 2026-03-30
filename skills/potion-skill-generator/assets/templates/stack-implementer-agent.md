@@ -1,5 +1,5 @@
 ---
-{{#unless plugin_mode}}name: {{project_name}}-{{stack_name}}-implementer
+{{#unless plugin_mode}}name: potion-{{stack_name}}-implementer
 {{/unless}}description: >
   Implements features in the {{stack_display_name}} stack of {{project_name}}
   following {{language}} patterns and {{frameworks}} conventions. Loads only

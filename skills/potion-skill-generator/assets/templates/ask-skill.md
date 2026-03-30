@@ -1,5 +1,5 @@
 ---
-{{#unless plugin_mode}}name: {{project_name}}-ask
+{{#unless plugin_mode}}name: potion-ask
 {{/unless}}description: >
   Answers questions about the {{project_name}} codebase. This skill should be
   used when someone asks "where is...", "how does X work", "why is Y done this
@@ -81,4 +81,4 @@ patterns → canonical examples → how to run tests.
 - Note migrations or inconsistencies when relevant (e.g., "module X uses the
   old pattern, the rest of the codebase uses the new one").
 - Keep answers focused. Answer the question, then offer to go deeper.
-- For complex exploration, delegate to the `{{project_name}}-explorer` agent.
+- For complex exploration, delegate to the `potion-explorer` agent.

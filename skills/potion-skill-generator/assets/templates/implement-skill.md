@@ -1,5 +1,5 @@
 ---
-{{#unless plugin_mode}}name: {{project_name}}-implement
+{{#unless plugin_mode}}name: potion-implement
 {{/unless}}description: >
   Implements new features, services, endpoints, or components in {{project_name}}
   following its established patterns and conventions. This skill should be used
@@ -75,7 +75,7 @@ Follow these steps in order:
 ## For complex tasks
 
 For tasks touching multiple modules or requiring more than ~200 lines of new
-code, consider delegating to the `{{project_name}}-implementer` agent for a
+code, consider delegating to the `potion-implementer` agent for a
 fresh context window focused on the implementation.
 
 ## Post-implementation checklist

@@ -1,5 +1,5 @@
 ---
-{{#unless plugin_mode}}name: {{project_name}}-architecture-reviewer
+{{#unless plugin_mode}}name: potion-architecture-reviewer
 {{/unless}}description: >
   Reviews code changes for architectural compliance in {{project_name}}.
   Checks module placement, layer boundaries, dependency direction, and

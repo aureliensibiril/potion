@@ -12,7 +12,7 @@
 
 ---
 
-## Ask skill (`{{project_name}}-ask`)
+## Ask skill (`potion-ask`)
 
 ### Prompt 1: Locate a component
 **Prompt:** "Where is {{ask_prompt_1}}?"
@@ -40,7 +40,7 @@
 
 ---
 
-## Implement skill (`{{project_name}}-implement`)
+## Implement skill (`potion-implement`)
 
 ### Prompt 1: Add a new component
 **Prompt:** "{{implement_prompt_1}}"
@@ -62,7 +62,7 @@
 
 ---
 
-## Review skill (`{{project_name}}-review`)
+## Review skill (`potion-review`)
 
 ### Prompt 1: Review a change
 **Prompt:** "Review my changes to {{review_prompt_1}}"
@@ -83,7 +83,7 @@
 
 ---
 
-## Plan skill (`{{project_name}}-plan`)
+## Plan skill (`potion-plan`)
 
 ### Prompt 1: Plan a new feature
 **Prompt:** "{{plan_prompt_1}}"
@@ -104,7 +104,7 @@
 
 ---
 
-## Explorer agent (`{{project_name}}-explorer`)
+## Explorer agent (`potion-explorer`)
 
 ### Prompt 1: Trace a flow
 **Prompt:** "Trace how {{explorer_prompt_1}}"
@@ -124,7 +124,7 @@
 
 ---
 
-## Implementer agent (`{{project_name}}-implementer`)
+## Implementer agent (`potion-implementer`)
 
 ### Prompt 1: Implement in context
 **Prompt:** "{{implementer_prompt_1}}"
@@ -136,7 +136,7 @@
 
 ---
 
-## Planner agent (`{{project_name}}-planner`)
+## Planner agent (`potion-planner`)
 
 ### Prompt 1: Design an implementation approach
 **Prompt:** "{{planner_prompt_1}}"
@@ -148,10 +148,10 @@
 
 ---
 
-## Reviewer agent (`{{project_name}}-reviewer`)
+## Reviewer agent (`potion-reviewer`)
 
 ### Prompt 1: Focused review
-**Prompt:** "Review {{reviewer_prompt_1}} for {{project_name}} standards"
+**Prompt:** "Review {{reviewer_prompt_1}} for project standards"
 **Expected:** Applies compact checklist, reports findings with severity.
 **Assertions:**
 - Uses blocker/suggestion severity classification

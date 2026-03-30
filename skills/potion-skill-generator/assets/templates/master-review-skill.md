@@ -1,5 +1,5 @@
 ---
-{{#unless plugin_mode}}name: {{project_name}}-review
+{{#unless plugin_mode}}name: potion-review
 {{/unless}}description: >
   Reviews code for {{project_name}} across multiple language stacks. Determines
   which stacks are in the diff, passes stack context to topic reviewers, and

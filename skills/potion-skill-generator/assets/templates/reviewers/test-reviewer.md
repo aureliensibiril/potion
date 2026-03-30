@@ -1,5 +1,5 @@
 ---
-{{#unless plugin_mode}}name: {{project_name}}-test-reviewer
+{{#unless plugin_mode}}name: potion-test-reviewer
 {{/unless}}description: >
   Reviews code changes for test quality and coverage in {{project_name}}.
   Checks that new functionality has tests, tests follow project conventions,
