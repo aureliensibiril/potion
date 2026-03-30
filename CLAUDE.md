@@ -52,6 +52,7 @@ skills/potion-skill-generator/
     readme-plugin.md, test-prompts.md
     master-implement-skill.md, master-plan-skill.md, master-review-skill.md
     stack-implementer-agent.md
+    partials/                           # Shared sections referenced via {{> partials/name#section}}
     reviewers/                          # Specialized reviewer sub-agent templates
 ```
 

@@ -198,6 +198,23 @@ In install mode, skills reference agents as `potion-explorer`, etc.
 In plugin mode, just say "the explorer agent" or "the implementer agent" —
 the plugin namespace handles routing.
 
+## Template partials
+
+Some templates use `{{> partials/plan-shared#section-id}}` to reference
+shared sections from `assets/templates/partials/`. When you encounter
+these markers:
+
+1. Read each partial file **once** and reuse its content for all
+   references to that file across all templates
+2. Find the section matching `#section-id` — each section runs from its
+   `## section-id` heading to the next `## ` heading or end of file
+3. Inline that section's content in place of the `{{> }}` marker
+4. Then fill in the codebase-specific placeholders as usual
+
+This keeps shared planning methodology (step granularity, self-review
+checklists, save/track/handoff) in one place across single-stack and
+multi-stack templates.
+
 ## Template selection by stack mode
 
 ### If stack_mode is "single" (default)
@@ -265,26 +282,31 @@ module, read canonical example, check for duplication, understand data flow),
 per-module patterns, testing requirements, file placement rules, pitfalls.
 
 ### skills/plan/SKILL.md
-Implementation planning with a 4-phase structure:
+Implementation planning with a 5-phase structure:
 - **Phase 0 — Pre-planning gate:** Classify task type (feature/refactor/bugfix/
   migration), explore codebase for context, ask targeted clarifying questions
   via `AskUserQuestion` to surface ambiguity and gather acceptance criteria.
 - **Phase 1 — Design:** Restate requirement with acceptance criteria, identify
   scope with module map, design approach using type-specific templates (each
   task type has its own checklist), check pitfalls.
-- **Phase 2 — Produce:** Generate structured plan with 2-5 minute granular
-  steps (each with exact file path, action, pattern reference, verification
-  command), dependency graph with parallel-safe steps, testing plan with
-  exact test names, risks with mitigations.
-- **Phase 3 — Self-review:** Completeness check (criteria→steps mapping),
-  placeholder scan (banned phrases like "TBD", "add validation", "similar
-  to step N"), dependency validation, scope check.
-- **Phase 4 — Save:** Persist plan to `docs/plans/{date}-{name}.md`.
+- **Phase 2 — Produce:** Map file structure first, then generate structured
+  plan with delivery stages (Foundation/Core/Hardening). Each step has exact
+  file path, action, code block, and verification command. Dependency graph
+  with parallel-safe steps, testing plan, risks with mitigations.
+- **Phase 3 — Verify:** Save as draft, then run hybrid verification:
+  (1) mechanical checks via Grep/Glob (banned phrases, file path
+  validation, criteria coverage), (2) cognitive review (type consistency,
+  dependencies, scope), (3) for non-trivial plans (3+ modules or 10+
+  steps), dispatch 3 parallel review agents with different lenses
+  (completeness, consistency, feasibility) using confidence-based
+  filtering (report only >= 80). Fix and re-save.
+- **Phase 4 — Present and hand off:** Create TodoWrite entries for
+  progress tracking, present summary, offer handoff to `/potion-implement`.
 
 Must include: patterns quick reference, canonical examples, no-placeholders
-policy with banned phrases table, plan output format with acceptance criteria
-and dependency graph. Tools: Read, Write, Glob, Grep, AskUserQuestion, Agent
-(Agent for delegating complex plans to the planner agent).
+policy with banned phrases table, plan output format with plan header
+(Goal/Type/Tech), file structure table, delivery stages, and dependency graph.
+Tools: Read, Write, Glob, Grep, AskUserQuestion, Agent, TodoWrite.
 
 ### skills/review/SKILL.md
 Code review. Must include: review checklist by category (architecture, patterns,
@@ -305,10 +327,12 @@ as quick-ref. Tools: Read, Write, Edit, Glob, Grep, Bash. Model: inherit.
 Planning agent for complex features/refactors that need a fresh context window.
 Reference guidelines and plan skill. Include module map, patterns quick-ref,
 pitfalls, type-specific planning approach (feature/refactor/bugfix/migration),
-structured plan output format with 2-5 minute granular steps, self-review
-checklist with placeholder scan, and plan persistence to `docs/plans/`.
-Tools: Read, Write, Glob, Grep. Model: inherit. Note: `AskUserQuestion`
-is intentionally excluded — agents operate non-interactively.
+file structure mapping, structured plan output format with delivery stages
+and code blocks in steps, structured verify process (save draft, mechanical
+checks via Grep/Glob, cognitive review, fix and re-save), TodoWrite progress
+tracking, and `/potion-implement` handoff.
+Tools: Read, Write, Glob, Grep, TodoWrite. Model: inherit. Note:
+`AskUserQuestion` is intentionally excluded — agents operate non-interactively.
 
 ### agents/reviewer.md
 Generalist code review agent. Include compact checklist. Tools: Read, Glob, Grep.
