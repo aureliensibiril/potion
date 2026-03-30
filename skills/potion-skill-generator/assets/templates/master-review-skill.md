@@ -42,10 +42,10 @@ for sub-agents.
 ### Medium changes (4-10 files, 1-2 stacks)
 Spawn 2-3 relevant topic reviewers based on what the changes touch. Tell each
 reviewer which stack's guidelines to load:
-- Backend route/service changes → pattern-reviewer + architecture-reviewer
-- Frontend component changes → style-reviewer + test-reviewer
-- Database migrations → security-reviewer + architecture-reviewer
-- New feature across modules → architecture-reviewer + pattern-reviewer + test-reviewer
+- Backend route/service changes → potion-pattern-reviewer + potion-architecture-reviewer
+- Frontend component changes → potion-style-reviewer + potion-test-reviewer
+- Database migrations → potion-security-reviewer + potion-architecture-reviewer
+- New feature across modules → potion-architecture-reviewer + potion-pattern-reviewer + potion-test-reviewer
 
 ### Large changes (10+ files, multiple stacks)
 Spawn all available topic reviewers in parallel. For each reviewer, pass the

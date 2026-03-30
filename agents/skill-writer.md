@@ -90,8 +90,14 @@ The guidelines path depends on delivery mode AND guidelines mode:
 
 ## Standalone mode (default)
 
-In standalone mode, skill directories are prefixed with `potion-` to avoid
-name collisions with other skills:
+In standalone mode, skill directories and agent names are prefixed with the
+**literal string `potion-`** to avoid name collisions with other skills.
+
+**CRITICAL: `potion-` is a fixed brand prefix, NOT the project name.** Do NOT
+replace `potion-` with the target project's name. A skill pack generated for
+a project called "acme" still uses `potion-ask`, `potion-implementer`,
+`potion-pattern-reviewer` — never `acme-ask` or `acme-implementer`. The
+templates already contain the correct `potion-` prefix — render them as-is.
 
 ```
 phase4-output/
@@ -194,7 +200,15 @@ directory. It is generation metadata, not part of the distributable plugin.
 
 ### 6. Agent cross-references
 
-In install mode, skills reference agents as `potion-explorer`, etc.
+In install mode, skills reference agents by their `name` field from the
+template frontmatter — always `potion-` prefixed. Examples:
+- Single-stack: `potion-implementer`, `potion-explorer`, `potion-reviewer`
+- Multi-stack: `potion-{stack_name}-implementer` (e.g., `potion-go-backend-implementer`)
+- Reviewers: `potion-pattern-reviewer`, `potion-architecture-reviewer`, etc.
+
+**Never substitute the project name for `potion-`.** The templates already
+contain the correct names — render them without modification.
+
 In plugin mode, just say "the explorer agent" or "the implementer agent" —
 the plugin namespace handles routing.
 

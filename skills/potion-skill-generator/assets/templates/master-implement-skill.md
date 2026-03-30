@@ -34,7 +34,7 @@ Use this table to map modules and file paths to their owning stack.
 ### {{display_name}} ({{language}})
 - **Frameworks:** {{frameworks}}
 - **Modules:** {{modules}}
-- **Implementer agent:** `{{name}}-implementer`
+- **Implementer agent:** `potion-{{name}}-implementer`
 - **Guidelines:** `{{guidelines_path}}/`
 {{/each}}
 
@@ -56,7 +56,7 @@ For every incoming task, run through these steps before spawning any agent:
 
 When only one stack is involved:
 
-1. Spawn the `{stack_name}-implementer` agent with the full task description.
+1. Spawn the `potion-{stack_name}-implementer` agent with the full task description.
 2. Let it handle the implementation end-to-end.
 3. No further orchestration needed.
 
