@@ -1,7 +1,7 @@
 {
   "name": "potion-skill-generator",
   "version": "2.5.0",
-  "description": "Analyzes any codebase and generates a tailored skill pack — coding, review, and Q&A skills plus shared guidelines — grounded in the project's actual architecture, patterns, and conventions.",
+  "description": "Analyzes any codebase and generates a tailored skill pack — coding skills, review agents, Q&A agents, and a shared guidelines document — then keeps them evolving through continuous learning from PR reviews, team feedback, and codebase drift.",
   "author": {
     "name": "Aurelien",
     "url": "https://github.com/aurelien"
