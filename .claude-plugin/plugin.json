@@ -1,6 +1,6 @@
 {
   "name": "potion-skill-generator",
-  "version": "2.3.0",
+  "version": "2.4.0",
   "description": "Analyzes any codebase and generates a tailored skill pack — coding, review, and Q&A skills plus shared guidelines — grounded in the project's actual architecture, patterns, and conventions.",
   "author": {
     "name": "Aurelien",
