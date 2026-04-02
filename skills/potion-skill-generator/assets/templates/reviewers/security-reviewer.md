@@ -5,7 +5,7 @@
   Checks authentication, authorization, data exposure, injection risks,
   secrets handling, and type safety in security-critical paths.
   Read-only — reports findings only.
-tools: Read, Glob, Grep
+tools: Bash, Read, Glob, Grep
 model: sonnet
 color: red
 effort: high

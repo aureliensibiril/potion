@@ -4,7 +4,7 @@
   Reviews code changes for style and convention compliance in {{project_name}}.
   Checks naming, formatting, localization, export patterns, and code style
   against documented standards. Read-only — reports findings only.
-tools: Read, Glob, Grep
+tools: Bash, Read, Glob, Grep
 model: sonnet
 color: cyan
 effort: high

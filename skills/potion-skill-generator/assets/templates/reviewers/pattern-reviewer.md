@@ -4,7 +4,7 @@
   Reviews code changes for pattern compliance in {{project_name}}.
   Checks error handling, data access, dependency injection, and type usage
   against established project patterns. Read-only — reports findings only.
-tools: Read, Glob, Grep
+tools: Bash, Read, Glob, Grep
 model: sonnet
 color: green
 effort: high

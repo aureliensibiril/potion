@@ -4,7 +4,7 @@
   Code review agent for {{project_name}}. Analyzes code changes against
   project standards. This agent is read-only — it reports findings and does
   not modify code.
-tools: Read, Glob, Grep
+tools: Bash, Read, Glob, Grep
 model: sonnet
 color: yellow
 effort: high

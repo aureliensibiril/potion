@@ -4,7 +4,7 @@
   Reviews code changes for architectural compliance in {{project_name}}.
   Checks module placement, layer boundaries, dependency direction, and
   public API surface. Read-only — reports findings only.
-tools: Read, Glob, Grep
+tools: Bash, Read, Glob, Grep
 model: sonnet
 color: yellow
 effort: high

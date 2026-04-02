@@ -5,7 +5,7 @@
   {{project_name}}. Detects near-identical logic, copy-paste patterns, and
   existing utilities that should have been used instead.
   Read-only — reports findings only.
-tools: Read, Glob, Grep
+tools: Bash, Read, Glob, Grep
 model: sonnet
 color: magenta
 effort: high

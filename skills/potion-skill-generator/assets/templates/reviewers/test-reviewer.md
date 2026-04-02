@@ -4,7 +4,7 @@
   Reviews code changes for test quality and coverage in {{project_name}}.
   Checks that new functionality has tests, tests follow project conventions,
   and edge cases are covered. Read-only — reports findings only.
-tools: Read, Glob, Grep
+tools: Bash, Read, Glob, Grep
 model: sonnet
 color: blue
 effort: high
