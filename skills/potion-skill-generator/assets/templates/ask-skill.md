@@ -10,7 +10,7 @@
   codebase".
 allowed-tools: Read, Glob, Grep
 model: sonnet
-effort: medium
+effort: high
 ---
 
 # {{project_name}} — Codebase Q&A

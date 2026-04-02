@@ -8,7 +8,7 @@
 tools: Read, Glob, Grep
 model: sonnet
 color: magenta
-effort: medium
+effort: high
 ---
 
 # {{project_name}} Duplication Reviewer

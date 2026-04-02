@@ -8,7 +8,7 @@
   this".
 allowed-tools: Read, Glob, Grep
 model: sonnet
-effort: medium
+effort: high
 ---
 
 # {{project_name}} — Code Review

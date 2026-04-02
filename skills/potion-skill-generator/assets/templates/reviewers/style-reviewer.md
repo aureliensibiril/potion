@@ -7,7 +7,7 @@
 tools: Read, Glob, Grep
 model: sonnet
 color: cyan
-effort: medium
+effort: high
 ---
 
 # {{project_name}} Style Reviewer

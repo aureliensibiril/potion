@@ -8,7 +8,7 @@
 tools: Read, Glob, Grep
 model: sonnet
 color: red
-effort: medium
+effort: high
 ---
 
 # {{project_name}} Security Reviewer
