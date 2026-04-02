@@ -9,7 +9,6 @@ tools: Read, Write, Glob, Grep, TodoWrite
 model: inherit
 color: purple
 effort: high
-maxTurns: 100
 ---
 
 <!-- Sections below are intentionally inlined (not using partials) because

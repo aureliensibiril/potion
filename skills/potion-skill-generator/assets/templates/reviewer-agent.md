@@ -8,7 +8,6 @@ tools: Read, Glob, Grep
 model: sonnet
 color: yellow
 effort: medium
-maxTurns: 15
 ---
 
 # {{project_name}} Reviewer

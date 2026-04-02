@@ -9,7 +9,6 @@ tools: Read, Glob, Grep
 model: sonnet
 color: blue
 effort: medium
-maxTurns: 15
 ---
 
 # {{project_name}} Explorer

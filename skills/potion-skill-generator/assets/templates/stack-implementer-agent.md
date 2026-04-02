@@ -8,7 +8,6 @@ tools: Read, Write, Edit, Glob, Grep, Bash
 model: opus
 color: green
 effort: high
-maxTurns: 120
 ---
 
 # {{project_name}} — {{stack_display_name}} Implementer

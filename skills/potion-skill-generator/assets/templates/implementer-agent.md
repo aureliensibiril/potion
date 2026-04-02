@@ -8,7 +8,6 @@ tools: Read, Write, Edit, Glob, Grep, Bash
 model: inherit
 color: green
 effort: high
-maxTurns: 25
 ---
 
 # {{project_name}} Implementer
